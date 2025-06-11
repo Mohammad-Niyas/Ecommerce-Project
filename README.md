@@ -7,4 +7,4 @@ This is a men's fashion e-commerce website built using:
 - 🎨 Tailwind CSS
 - 🔐 JWT Authentication
 - 📦 Product & Variant Management
-- 📧 Email OTP (SendGrid)
+- 📧 Email OTP (Brevo)
