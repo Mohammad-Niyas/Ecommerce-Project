@@ -532,7 +532,7 @@ func UserLogin(c *gin.Context) {
     }
 
     fmt.Println("Generated Token:", token)
-    c.SetCookie("jwtTokensUser", token, 24*3600, "/", "localhost", false, false) 
+    c.SetCookie("jwtTokensUser", token, 24*3600, "/", "", false, false) 
     fmt.Println("Cookie set for user:", email)
     c.Redirect(http.StatusSeeOther, "/")
 }
