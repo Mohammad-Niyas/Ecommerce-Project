@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #f8f8f8 0%, #ffffff 100%);
+            color: #2d2d2d;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .logo-corner img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-corner img:hover {
+            transform: scale(1.05);
+        }
+
+        #categoriesDropdown {
+            z-index: 1000;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 220px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #2d2d2d;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .settings-container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 50px auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: row;
+            gap: 2.5rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
+        }
+
+        .settings-sidebar {
+            flex: 1;
+            background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+            padding: 2.5rem;
+            border-right: 1px solid #e8e8e8;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-img {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            border-radius: 50%;
+            display: inline-block;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .profile h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.2rem;
+            text-decoration: none;
+            color: #4b4b4b;
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu a:hover {
+            background: #e0e0e0;
+            color: #000000;
+            transform: translateX(5px);
+        }
+
+        .menu a.active {
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .menu a i {
+            margin-right: 0.75rem;
+            color: #6b6b6b;
+            transition: color 0.3s ease;
+        }
+
+        .menu a:hover i,
+        .menu a.active i {
+            color: #000000;
+        }
+
+        .menu a.active i {
+            color: #ffffff;
+        }
+
+        .settings-content {
+            flex: 2;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(to right, #333333, #000000);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cart Items List */
+        .cart-items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .cart-item-card {
+            background: #f5f5f5;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: row;
+            gap: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-item-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid #e8e8e8;
+        }
+
+        .cart-item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .cart-item-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cart-item-price {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .original-price {
+            font-size: 0.9rem;
+            color: #888888;
+            text-decoration: line-through;
+        }
+
+        .sale-price {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .cart-item-size {
+            margin-top: 0.3rem;
+            font-size: 1rem;
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-box {
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-radius: 20px;
+            padding: 0.3rem;
+        }
+
+        .qty-btn {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .qty-btn:hover {
+            background: linear-gradient(to right, #1a1a1a, #000000);
+        }
+
+        .qty-input {
+            width: 50px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 1rem;
+            color: #1a1a1a;
+        }
+
+        .cart-item-total {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .cart-item-action {
+            display: flex;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            color: #ff0000;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            color: #cc0000;
+        }
+
+        .empty-cart-message {
+            text-align: center;
+            padding: 50px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #666666;
+            background: #f9f9f9;
+            border-radius: 12px;
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15), inset 0 0 10px rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            position: sticky;
+            top: 20px;
+            width: 100%;
+            max-width: 300px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .order-summary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 0 15px rgba(255, 215, 0, 0.15);
+        }
+
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            color: #ffffff;
+            letter-spacing: 0.03em;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 0.4rem;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            font-size: 0.8rem;
+            border-bottom: 1px dashed rgba(255, 215, 0, 0.2);
+            color: #d1d1d1;
+        }
+
+        .summary-item span:first-child {
+            color: #b0b0b0;
+            font-weight: 400;
+        }
+
+        .summary-item span:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .discount {
+            color: #00cc00;
+            font-weight: 600;
+        }
+
+        .crossed-out {
+            color: #888888;
+            text-decoration: line-through;
+            font-size: 0.7rem;
+            margin-right: 0.15rem;
+        }
+
+        .free {
+            color: #00cc00;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: rgba(0, 204, 0, 0.2);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+        }
+
+        .summary-total {
+            font-weight: 700;
+            font-size: 1rem;
+            border-bottom: none;
+            margin-top: 0.3rem;
+            padding-top: 0.4rem;
+            color: #ffffff;
+        }
+
+        .summary-total span:first-child {
+            color: #ffffff;
+        }
+
+        .summary-total span:last-child {
+            color: #ffd700;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .checkout-button {
+            width: 100%;
+            background: linear-gradient(to right, #ffffff, #f0f0f0);
+            color: #1a1a1a;
+            padding: 0.9rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .checkout-button:hover {
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .checkout-button i {
+            transition: transform 0.3s ease;
+        }
+
+        .checkout-button:hover i {
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                flex-direction: column;
+                margin: 20px auto;
+                padding: 1rem;
+                width: 95%;
+            }
+
+            .settings-sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e8e8e8;
+            }
+
+            .profile-img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .profile h3 {
+                font-size: 1.6rem;
+            }
+
+            .menu a {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.9rem;
+            }
+
+            .cart-item-card {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .cart-item-image {
+                width: 60px;
+                height: 60px;
+            }
+
+            .cart-item-details {
+                gap: 0.8rem;
+            }
+
+            .cart-item-action {
+                justify-content: flex-end;
+            }
+
+            .order-summary {
+                position: static;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png"
+                                alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton"
+                            class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:outline-none transition-all duration-300"
+                            aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown"
+                            class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{range .categories}}
+                            <a href="/product?category={{.ID}}"
+                                class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..."
+                            class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none search-input"
+                            id="searchInput">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button
+                            class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors"
+                            onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i
+                                class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i
+                                class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton"
+                                class="text-black hover:text-gray-600 transition-colors focus:outline-none"
+                                title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                {{if .isLoggedIn}}
+                                <a href="/profile" class="flex items-center space-x-2" data-page="profile">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
+                                    <span>User Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                                    <span>Logout</span>
+                                </a>
+                                {{else}}
+                                <a href="/signup" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-plus text-gray-600"></i>
+                                    <span>Sign Up</span>
+                                </a>
+                                <a href="/login" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-in-alt text-gray-600"></i>
+                                    <span>Login</span>
+                                </a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i
+                                    class="fas fa-shopping-bag text-xl"></i></a>
+                            <span
+                                class="absolute -top-2 -right-2 text-white cart-badge flex items-center justify-center"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Section -->
+    <section class="py-12">
+        <div class="settings-container">
+            <div class="settings-sidebar">
+                <div class="profile">
+                    <div class="profile-img">
+                        {{if .userImage}}
+                        <img src="{{.userImage}}" alt="Profile Image"
+                            style="width: 100%; height: 100%; border-radius: 50%;">
+                        {{end}}
+                    </div>
+                    <h3>{{.username}}</h3>
+                </div>
+                <div class="menu">
+                    <a href="/profile" data-page="profile"><i class="fas fa-user"></i> Personal Information</a>
+                    <a href="/orders" data-page="orders"><i class="fas fa-box"></i> My Orders</a>
+                    <a href="/wishlist" data-page="wishlist"><i class="far fa-heart"></i> Wishlist</a>
+                    <a href="/cart" data-page="cart" class="active"><i class="fas fa-shopping-cart"></i> Shopping
+                        Cart</a>
+                    <a href="/wallet" data-page="wallet"><i class="fas fa-wallet"></i> Wallet</a>
+                    <a href="/address" data-page="addresses"><i class="fas fa-map-marker-alt"></i> Manage Address</a>
+                    <a href="/settings" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            <div class="settings-content">
+                <h2 class="section-title">Your Cart</h2>
+                <div class="content-section active" id="cart-section">
+                    <!-- Cart Items List -->
+                    <div class="cart-items-list">
+                        {{if .cartItems}}
+                        {{range $index, $item := .cartItems}}
+                        <div class="cart-item-card" data-cart-item-id="{{$item.CartItem.ID}}"
+                            data-actual-price="{{$item.CartItem.ProductVariant.ActualPrice}}"
+                            data-selling-price="{{$item.CartItem.ProductVariant.SellingPrice}}">
+                            {{if $item.CartItem.Product.Images}}
+                            <img src="{{(index $item.CartItem.Product.Images 0).ImageURL}}"
+                                alt="{{$item.CartItem.Product.ProductName}}" class="cart-item-image">
+                            {{else}}
+                            <img src="https://via.placeholder.com/80" alt="{{$item.CartItem.Product.ProductName}}"
+                                class="cart-item-image">
+                            {{end}}
+                            <div class="cart-item-details">
+                                <h3 class="cart-item-name" title="{{$item.CartItem.Product.ProductName}}">
+                                    {{$item.CartItem.Product.ProductName}}
+                                </h3>
+                                <div class="cart-item-price">
+                                    {{if ne $item.Discount 0.0}}
+                                    <span class="original-price">₹{{printf "%.2f" $item.CartItem.ProductVariant.ActualPrice}}</span>
+                                    <span class="sale-price">₹{{printf "%.2f" $item.CartItem.ProductVariant.SellingPrice}}</span>
+                                    {{else}}
+                                    <span class="sale-price">₹{{printf "%.2f" $item.CartItem.ProductVariant.SellingPrice}}</span>
+                                    {{end}}
+                                </div>
+                                {{if $item.Size}}
+                                <div class="cart-item-size">
+                                    <span class="text-base text-gray-800 font-semibold">Size: {{$item.Size}}</span>
+                                </div>
+                                {{end}}
+                                <div class="cart-item-quantity">
+                                    <span>Quantity:</span>
+                                    <div class="quantity-box">
+                                        <button class="qty-btn qty-decrease" data-cart-item-id="{{$item.CartItem.ID}}">-</button>
+                                        <input type="number" class="qty-input" value="{{$item.CartItem.Quantity}}" min="1"
+                                            max="{{if gt $item.CartItem.ProductVariant.StockCount 4}}4{{else}}{{$item.CartItem.ProductVariant.StockCount}}{{end}}"
+                                            data-stock="{{$item.CartItem.ProductVariant.StockCount}}" readonly>
+                                        <button class="qty-btn qty-increase" data-cart-item-id="{{$item.CartItem.ID}}">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cart-item-action">
+                                <span class="cart-item-total" id="item-total-{{$index}}">₹{{printf "%.2f" $item.ItemTotal}}</span>
+                                <button class="remove-btn" data-cart-item-id="{{$item.CartItem.ID}}"
+                                    data-item-name="{{$item.CartItem.Product.ProductName}}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        {{end}}
+                        {{else}}
+                        <div class="empty-cart-message">
+                            Your cart is empty. Discover our collection to start shopping!
+                        </div>
+                        {{end}}
+                    </div>
+    
+                    <!-- Order Summary (Only shown if cart has items) -->
+                    {{if .cartItems}}
+                    <div class="order-summary">
+                        <h3 class="summary-title">Order Summary</h3>
+                        <div class="summary-item">
+                            <span>Subtotal ({{.itemCount}} items)</span>
+                            <span id="subtotal">₹{{printf "%.2f" .subtotal}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Discount</span>
+                            <span id="discount" class="discount">-₹{{printf "%.2f" .discount}}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Delivery Charge</span>
+                            <span id="delivery-charge">
+                                {{if ge .subtotal 1000.0}}
+                                <span class="crossed-out">₹99</span> <span class="free">Free Delivery</span>
+                                {{else}}
+                                ₹99
+                                {{end}}
+                            </span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Tax (3%)</span>
+                            <span id="tax">₹{{printf "%.2f" .tax}}</span>
+                        </div>
+                        <div class="summary-item summary-total">
+                            <span>Total</span>
+                            <span id="estimated-total">₹{{printf "%.2f" .total}}</span>
+                        </div>
+                        <button class="checkout-button">
+                            <span>Checkout Now</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </Schemesection>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+    
+    <!-- JavaScript -->
+    <script>
+        window.csrfToken = "{{.CSRFToken}}";
+        document.addEventListener('DOMContentLoaded', function () {
+            updateCartTotal();
+    
+            function updateCartTotal() {
+                let subtotal = 0;
+                let discount = 0;
+                const rows = document.querySelectorAll('.cart-item-card');
+                rows.forEach((row, index) => {
+                    const actualPrice = parseFloat(row.getAttribute('data-actual-price')) || 0;
+                    const sellingPrice = parseFloat(row.getAttribute('data-selling-price')) || 0;
+                    const quantity = parseInt(row.querySelector('.qty-input').value);
+                    const itemTotal = sellingPrice * quantity;
+                    row.querySelector(`#item-total-${index}`).textContent = `₹${itemTotal.toFixed(2)}`;
+                    subtotal += actualPrice * quantity;
+                    discount += (actualPrice - sellingPrice) * quantity;
+                });
+    
+                const tax = (subtotal - discount) * 0.03;
+                const deliveryCharge = (subtotal - discount) < 1000 ? 99 : 0;
+                const total = subtotal - discount + tax + deliveryCharge;
+    
+                const deliveryElement = document.getElementById('delivery-charge');
+                if (subtotal - discount >= 1000) {
+                    deliveryElement.innerHTML = '<span class="crossed-out">₹99</span> <span class="free">Free Delivery</span>';
+                } else {
+                    deliveryElement.textContent = '₹99';
+                }
+    
+                document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+                document.getElementById('discount').textContent = `-₹${discount.toFixed(2)}`;
+                document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
+                document.getElementById('estimated-total').textContent = `₹${total.toFixed(2)}`;
+            }
+    
+            function updateQuantity(cartItemId, newQuantity) {
+                const token = document.cookie.split('; ').find(row => row.startsWith('jwtTokensUser='))?.split('=')[1];
+                fetch('/cart/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        cart_item_id: parseInt(cartItemId),
+                        quantity: newQuantity
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "Success") {
+                            updateCartTotal();
+                        } else {
+                            alert('Failed to update quantity: ' + data.message);
+                            location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Update Error:', error);
+                        alert('An error occurred while updating imbun the quantity.');
+                        location.reload();
+                    });
+            }
+    
+            document.querySelectorAll('.qty-increase').forEach(button => {
+                button.addEventListener('click', function () {
+                    const cartItemId = this.getAttribute('data-cart-item-id');
+                    const input = this.previousElementSibling;
+                    const value = parseInt(input.value);
+                    const stock = parseInt(input.getAttribute('data-stock')) || 0;
+                    const maxAllowed = Math.min(4, stock);
+                    if (value < maxAllowed) {
+                        input.value = value + 1;
+                        updateQuantity(cartItemId, value + 1);
+                    } else {
+                        alert(`Cannot increase beyond ${maxAllowed}. Stock: ${stock}`);
+                    }
+                });
+            });
+    
+            document.querySelectorAll('.qty-decrease').forEach(button => {
+                button.addEventListener('click', function () {
+                    const cartItemId = this.getAttribute('data-cart-item-id');
+                    const input = this.nextElementSibling;
+                    const value = parseInt(input.value);
+                    if (value > 1) {
+                        input.value = value - 1;
+                        updateQuantity(cartItemId, value - 1);
+                    }
+                });
+            });
+    
+            document.querySelectorAll('.remove-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const cartItemId = this.getAttribute('data-cart-item-id');
+                    const itemName = this.getAttribute('data-item-name');
+                    const row = this.closest('.cart-item-card');
+                    if (!confirm(`Remove "${itemName}" from your cart?`)) return;
+    
+                    const token = document.cookie.split('; ').find(row => row.startsWith('jwtTokensUser='))?.split('=')[1];
+                    fetch('/cart/remove', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            cart_item_id: parseInt(cartItemId)
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "Success") {
+                                row.remove();
+                                updateCartTotal();
+                                if (!document.querySelector('.cart-item-card')) {
+                                    document.querySelector('.cart-items-list').innerHTML = '<div class="empty-cart-message">Your cart is empty. Discover our collection to start shopping!</div>';
+                                    document.querySelector('.order-summary').remove();
+                                }
+                            } else {
+                                alert('Failed to remove item: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Remove Error:', error);
+                            alert('An error occurred while removing the item.');
+                        });
+                });
+            });
+    
+            document.querySelector('.checkout-button').addEventListener('click', function () {
+                const rows = document.querySelectorAll('.cart-item-card');
+                if (rows.length === 0) {
+                    alert('Your cart is empty. Add some items before proceeding to checkout.');
+                    return;
+                }
+                window.location.href = '/checkout/address';
+            });
+        });
+    </script>
+</body>z
+
+</html>

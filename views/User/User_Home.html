@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Premium Fashion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <style>
+        /* Your existing styles remain unchanged */
+        body {
+            font-family: 'Lora', serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .logo-corner img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-corner img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Popup Styles */
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .popup.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .popup.success {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: #ffffff;
+        }
+
+        .popup.error {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+            color: #ffffff;
+        }
+
+        .popup .popup-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .popup .popup-content i {
+            font-size: 1.25rem;
+        }
+
+        .dropdown-active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .product-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .swiper-slide img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swiper-pagination-bullet {
+            background: #ffffff;
+            opacity: 0.5;
+        }
+
+        .swiper-pagination-bullet-active {
+            opacity: 1;
+            background: #000000;
+        }
+
+        .search-input:focus {
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-badge {
+            min-width: 18px;
+            min-height: 18px;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-items {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 0;
+            }
+
+            .dropdown {
+                width: 100%;
+                left: 0;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .swiper-slide img {
+                height: 250px;
+            }
+        }
+
+        .mySwiper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .swiper-slide img {
+            transition: transform 5s ease-in-out;
+        }
+
+        .swiper-slide-active img {
+            transform: scale(1.05);
+        }
+
+        .swiper-button-next,
+        .swiper-button-prev {
+            width: 40px;
+            height: 40px;
+            margin-top: -20px;
+        }
+
+        .swiper-button-next::after,
+        .swiper-button-prev::after {
+            font-size: 18px;
+        }
+
+        .swiper-pagination {
+            bottom: 10px !important;
+        }
+
+        .swiper-pagination-bullet {
+            background: rgba(255, 215, 0, 0.5);
+            opacity: 1;
+            width: 10px;
+            height: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: #f59e0b;
+            width: 12px;
+            height: 12px;
+            transform: scale(1.2);
+        }
+
+        @keyframes pulseText {
+            0% {
+                text-shadow: 0 0 0 rgba(255, 215, 0, 0);
+            }
+
+            50% {
+                text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3);
+            }
+
+            100% {
+                text-shadow: 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+
+        .animate-pulse-text {
+            animation: pulseText 3s infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+
+        @media (max-width: 768px) {
+            .banner-text h1 {
+                font-size: 2.5rem !important;
+            }
+
+            .banner-text p {
+                font-size: 1rem !important;
+            }
+
+            .swiper-slide img {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .banner-text h1 {
+                font-size: 2rem !important;
+            }
+
+            .banner-text p {
+                font-size: 0.875rem !important;
+            }
+
+            .swiper-slide img {
+                height: 250px;
+            }
+
+            .swiper-button-next,
+            .swiper-button-prev {
+                width: 30px;
+                height: 30px;
+            }
+
+            .swiper-button-next::after,
+            .swiper-button-prev::after {
+                font-size: 14px;
+            }
+        }
+
+        .features-section {
+            background: linear-gradient(135deg, #f7f7f7 0%, #e5e5e5 100%);
+            overflow: hidden;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            background: linear-gradient(135deg, #1a1a1a 0%, #4a4a4a 100%);
+            color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 50%;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+        }
+
+        .feature-title {
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 0.05em;
+        }
+
+        .brand-logos-section {
+            background: linear-gradient(to bottom, #f9f9f9 0%, #ffffff 100%);
+            padding: 4rem 0;
+            overflow: hidden;
+        }
+
+        .brand-logo-container {
+            perspective: 1000px;
+        }
+
+        .brand-logo {
+            max-width: 120px;
+            opacity: 0.75;
+            transition: all 0.4s ease;
+            filter: grayscale(50%);
+        }
+
+        .brand-logo-container:hover .brand-logo {
+            opacity: 1;
+            transform: scale(1.1) rotateY(10deg);
+            filter: grayscale(0%);
+        }
+
+        .brand-logo-wrapper {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .brand-logo-container:hover .brand-logo-wrapper {
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .new-arrivals-section {
+            background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+            overflow: hidden;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            transition: transform 0.6s ease-in-out;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.08);
+        }
+
+        .product-overlay {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+        }
+
+        .wishlist-btn,
+        .cart-btn {
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+        }
+
+        .wishlist-btn:hover {
+            background: #e63946;
+            color: #ffffff;
+        }
+
+        .cart-btn {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            padding: 0.75rem;
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .group:hover .cart-btn {
+            opacity: 1;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0.05em;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 200px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #333333;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: #f1f1f1;
+            color: #e63946;
+        }
+
+        .user-dropdown a i {
+            margin-right: 8px;
+        }
+
+        .user-icon-container {
+            position: relative;
+        }
+
+        #categoriesDropdown {
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png"
+                                alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton"
+                            class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:outline-none transition-all duration-300"
+                            aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown"
+                            class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{range .categories}}
+                            <a href="/product?category={{.ID}}"
+                                class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..."
+                            class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none search-input"
+                            id="searchInput">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button
+                            class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors"
+                            onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i
+                                class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i
+                                class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton"
+                                class="text-black hover:text-gray-600 transition-colors focus:outline-none"
+                                title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                {{if .isLoggedIn}}
+                                <a href="/profile" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
+                                    <span>User Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                                    <span>Logout</span>
+                                </a>
+                                {{else}}
+                                <a href="/signup" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-plus text-gray-600"></i>
+                                    <span>Sign Up</span>
+                                </a>
+                                <a href="/login" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-in-alt text-gray-600"></i>
+                                    <span>Login</span>
+                                </a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i
+                                    class="fas fa-shopping-bag text-xl"></i></a>
+                            <span
+                                class="absolute -top-2 -right-2 text-white cart-badge flex items-center justify-center"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner Section (Carousel) -->
+    <section class="mt-6 relative overflow-hidden">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div
+                class="swiper mySwiper rounded-xl overflow-hidden shadow-xl transform hover:shadow-2xl transition-shadow duration-300">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide relative">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741588658/ohgicmqkcu2quwquprap.jpg"
+                            alt="Men's Fashion Model 1" class="w-full h-[400px] object-cover">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center">
+                            <div class="banner-text text-center px-4">
+                                <h1
+                                    class="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-wide animate-pulse-text">
+                                    Discover Luxury Fashion</h1>
+                                <p class="text-sm md:text-lg text-gray-100 mt-2 font-light animate-fade-in">Elevate Your
+                                    Wardrobe</p>
+                                <a href="/product"
+                                    class="mt-4 inline-block bg-gradient-to-r from-rose-500 to-amber-500 text-white px-6 py-2 rounded-full hover:from-rose-600 hover:to-amber-600 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg">Shop
+                                    Now</a>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 left-4 w-12 h-12 bg-rose-500/20 rounded-full blur-md animate-pulse">
+                        </div>
+                    </div>
+                    <div class="swiper-slide relative">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741588658/keuvarzwgcfu0uaagqfh.png"
+                            alt="Men's Fashion Model 2" class="w-full h-[400px] object-cover">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center">
+                            <div class="banner-text text-center px-4">
+                                <h1
+                                    class="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-wide animate-pulse-text">
+                                    New Arrivals in Style</h1>
+                                <p class="text-sm md:text-lg text-gray-100 mt-2 font-light animate-fade-in">Fresh Looks,
+                                    Timeless Elegance</p>
+                                <a href="/new-arrivals"
+                                    class="mt-4 inline-block bg-gradient-to-r from-rose-500 to-amber-500 text-white px-6 py-2 rounded-full hover:from-rose-600 hover:to-amber-600 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg">Explore
+                                    Now</a>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 left-4 w-12 h-12 bg-rose-500/20 rounded-full blur-md animate-pulse">
+                        </div>
+                    </div>
+                    <div class="swiper-slide relative">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741588658/bcmcsmi5v9a3n6qefqrf.jpg"
+                            alt="Men's Fashion Model 3" class="w-full h-[400px] object-cover">
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-center justify-center">
+                            <div class="banner-text text-center px-4">
+                                <h1
+                                    class="text-3xl md:text-5xl font-extrabold text-white uppercase tracking-wide animate-pulse-text">
+                                    Exclusive Deals for You</h1>
+                                <p class="text-sm md:text-lg text-gray-100 mt-2 font-light animate-fade-in">Unmatched
+                                    Offers Await</p>
+                                <a href="/special-offers"
+                                    class="mt-4 inline-block bg-gradient-to-r from-rose-500 to-amber-500 text-white px-6 py-2 rounded-full hover:from-rose-600 hover:to-amber-600 transition-all duration-300 text-sm font-medium shadow-md hover:shadow-lg">Discover
+                                    Deals</a>
+                            </div>
+                        </div>
+                        <div class="absolute top-4 left-4 w-12 h-12 bg-rose-500/20 rounded-full blur-md animate-pulse">
+                        </div>
+                    </div>
+                </div>
+                <div
+                    class="swiper-button-next text-white opacity-70 hover:opacity-100 transition-opacity duration-300 bg-black/30 rounded-full">
+                </div>
+                <div
+                    class="swiper-button-prev text-white opacity-70 hover:opacity-100 transition-opacity duration-300 bg-black/30 rounded-full">
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-16">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                <div class="feature-card flex flex-col items-center">
+                    <div class="feature-icon mb-5">
+                        <i class="fas fa-truck text-2xl"></i>
+                    </div>
+                    <h3 class="feature-title text-lg font-bold text-gray-900 uppercase tracking-wide">Free Shipping</h3>
+                    <p class="text-sm text-gray-600 mt-2">Complimentary on orders over $199</p>
+                </div>
+                <div class="feature-card flex flex-col items-center">
+                    <div class="feature-icon mb-5">
+                        <i class="fas fa-lock text-2xl"></i>
+                    </div>
+                    <h3 class="feature-title text-lg font-bold text-gray-900 uppercase tracking-wide">Secure Checkout
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-2">100% protected paymentsŁ</p>
+                </div>
+                <div class="feature-card flex flex-col items-center">
+                    <div class="feature-icon mb-5">
+                        <i class="fas fa-undo text-2xl"></i>
+                    </div>
+                    <h3 class="feature-title text-lg font-bold text-gray-900 uppercase tracking-wide">Guaranteed Returns
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-2">30-day money-back promise</p>
+                </div>
+                <div class="feature-card flex flex-col items-center">
+                    <div class="feature-icon mb-5">
+                        <i class="fas fa-headset text-2xl"></i>
+                    </div>
+                    <h3 class="feature-title text-lg font-bold text-gray-900 uppercase tracking-wide">Always Here</h3>
+                    <p class="text-sm text-gray-600 mt-2">24/7 premium support</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Arrivals Section -->
+    <section class="new-arrivals-section py-20">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="flex justify-between items-center mb-12">
+                <h2 class="section-title text-4xl font-bold text-gray-900 tracking-tight">New Arrivals</h2>
+                <a href="/product"
+                    class="bg-gradient-to-r from-gray-900 to-gray-700 text-white px-6 py-2 rounded-full text-sm font-medium uppercase tracking-wide hover:from-gray-800 hover:to-gray-600 transition-all duration-300 shadow-md">Discover
+                    More</a>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                {{range .products}}
+                <a href="/product/{{.Product.ID}}" class="block">
+                    <div class="product-card group">
+                        <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+                            {{if .Product.Images}}
+                            <img src="{{(index .Product.Images 0).ImageURL}}" alt="{{.Product.ProductName}}"
+                                class="product-image w-full h-full object-cover">
+                            {{else}}
+                            <img src="https://via.placeholder.com/500x375" alt="{{.Product.ProductName}}"
+                                class="product-image w-full h-full object-cover">
+                            {{end}}
+                            <div
+                                class="absolute inset-0 product-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+                            </div>
+                            {{if $.isLoggedIn}}
+                            <button
+                                class="wishlist-btn absolute top-4 right-4 opacity-0 group-hover:opacity-100 rounded-full p-2 shadow-md"
+                                onclick="addToWishlist('{{.Product.ID}}', '{{if .Product.Variants}}{{(index .Product.Variants 0).ID}}{{else}}0{{end}}')">
+                                <i class="far fa-heart text-gray-800 text-base"></i>
+                            </button>
+                            <button class="cart-btn"
+                                onclick="addToCart('{{.Product.ID}}', '{{if .Product.Variants}}{{(index .Product.Variants 0).ID}}{{else}}0{{end}}')">
+                                <i class="fas fa-shopping-cart text-base"></i>
+                            </button>
+                            {{end}}
+                        </div>
+                        <div class="p-6 text-center">
+                            <h3 class="text-gray-900 font-medium text-lg font-['Lora'] truncate">
+                                {{.Product.ProductName}}</h3>
+                            {{if .Product.Variants}}
+                            <p class="mt-3 text-gray-700 text-sm">
+                                <span class="line-through text-gray-500 font-medium">₹{{printf "%.2f" (index
+                                    .Product.Variants 0).ActualPrice}}</span>
+                                <span class="ml-2 text-gray-900 font-semibold">₹{{printf "%.2f" .SellingPrice}}</span>
+                                {{if and (ne .Discount 0.0) (gt .Discount 0.0)}}
+                                <span
+                                    class="ml-2 inline-block bg-rose-500 text-white text-xs font-semibold px-2 py-1 rounded-full">{{printf
+                                    "%.0f" .Discount}}% OFF</span>
+                                {{end}}
+                            </p>
+                            {{else}}
+                            <p class="mt-3 text-gray-700 text-sm font-medium">Price not available</p>
+                            {{end}}
+                        </div>
+                    </div>
+                </a>
+                {{else}}
+                <p class="text-gray-700 text-center col-span-full text-lg font-['Lora']">No new arrivals available at
+                    the moment.</p>
+                {{end}}
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Logos Section -->
+    <section class="brand-logos-section">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-10 items-center justify-items-center">
+                <div class="brand-logo-container">
+                    <div class="brand-logo-wrapper">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741590261/oqxtv5pydrbjwxptw24c.png"
+                            alt="H&M" class="brand-logo">
+                    </div>
+                </div>
+                <div class="brand-logo-container">
+                    <div class="brand-logo-wrapper">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741590260/gamgeaoshqfdq6u8okgo.png"
+                            alt="Louis Vuitton" class="brand-logo">
+                    </div>
+                </div>
+                <div class="brand-logo-container">
+                    <div class="brand-logo-wrapper">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741590261/glx2qqivk8pgk4ttgtyh.png"
+                            alt="Prada" class="brand-logo">
+                    </div>
+                </div>
+                <div class="brand-logo-container">
+                    <div class="brand-logo-wrapper">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741590260/ddeksbvu9kekege9wgws.png"
+                            alt="Calvin Klein" class="brand-logo">
+                    </div>
+                </div>
+                <div class="brand-logo-container">
+                    <div class="brand-logo-wrapper">
+                        <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741590261/bji8uxcqphp9oevowrxo.png"
+                            alt="Denim" class="brand-logo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const swiper = new Swiper('.mySwiper', {
+                loop: true,
+                autoplay: { delay: 5000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true, bulletClass: 'swiper-pagination-bullet', bulletActiveClass: 'swiper-pagination-bullet-active' },
+                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                effect: 'fade',
+                fadeEffect: { crossFade: true },
+                speed: 1000,
+            });
+        });
+
+        document.getElementById('categoriesButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('scale-y-100');
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'false' ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('categoriesButton');
+            const dropdown = document.getElementById('categoriesDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('scale-y-100');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('userButton').addEventListener('click', function (e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('userButton');
+            const dropdown = document.getElementById('userDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('active');
+            }
+        });
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            window.location.href = `/product?search=${encodeURIComponent(query)}`;
+        }
+
+        function showPopup(message, type = 'success') {
+            const popup = document.createElement('div');
+            popup.className = `popup ${type}`;
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.classList.add('show'), 10);
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.remove(), 300);
+            }, 3000);
+        }
+
+        function addToCart(productId, variantId) {
+            event.preventDefault();
+            event.stopPropagation(); // Prevent link navigation
+            console.log('Add to Cart - ProductID:', productId, 'VariantID:', variantId);
+
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Ensure cookie is sent
+                body: JSON.stringify({ product_id: parseInt(productId), variant_id: parseInt(variantId), quantity: 1 })
+            })
+                .then(response => {
+                    console.log('Add to Cart - Status:', response.status);
+                    if (!response.ok) throw new Error('Failed to add to cart');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Add to Cart - Response:', data);
+                    if (data.status === 'Success') {
+                        showPopup('Item added to cart successfully!', 'success');
+                        updateCartBadge();
+                    } else {
+                        showPopup('Failed to add item: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Add to Cart - Error:', error);
+                    showPopup('An error occurred while adding to cart.', 'error');
+                });
+        }
+
+        function addToWishlist(productId, variantId) {
+            event.preventDefault();
+            event.stopPropagation(); // Prevent link navigation
+            console.log('Add to Wishlist - ProductID:', productId, 'VariantID:', variantId);
+
+            fetch('/wishlist/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include', // Ensure cookie is sent
+                body: JSON.stringify({ product_id: parseInt(productId), variant_id: parseInt(variantId) })
+            })
+                .then(response => {
+                    console.log('Add to Wishlist - Status:', response.status);
+                    if (!response.ok) throw new Error('Failed to add to wishlist');
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Add to Wishlist - Response:', data);
+                    if (data.status === 'Success') {
+                        showPopup(data.message, 'success');
+                    } else {
+                        showPopup('Error: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Add to Wishlist - Error:', error);
+                    showPopup('An error occurred while adding to wishlist.', 'error');
+                });
+        }
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cartBadge');
+            fetch('/cart/count', {
+                method: 'GET',
+                credentials: 'include' // Send cookie with request
+            })
+                .then(response => response.json())
+                .then(data => {
+                    badge.textContent = data.count || '0';
+                    badge.style.display = data.count > 0 ? 'inline-flex' : 'none';
+                })
+                .catch(error => {
+                    console.error('Error fetching cart count:', error);
+                    badge.textContent = '0';
+                    badge.style.display = 'none';
+                });
+        }
+    </script>
+</body>
+
+</html>

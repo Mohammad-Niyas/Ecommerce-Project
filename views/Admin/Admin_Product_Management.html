@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Premium Products</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        /* Premium Table Styling */
+        .premium-table {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: #000000;
+            color: white;
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        td {
+            padding: 20px;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: rgba(245, 245, 245, 0.8);
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        /* Premium Buttons */
+        .status-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            filter: brightness(110%);
+        }
+
+        .status-unblocked {
+            background: linear-gradient(45deg, #147ad6, #3498db);
+            color: white;
+        }
+
+        .status-blocked {
+            background: linear-gradient(45deg, #d85c38, #e74c3c);
+            color: white;
+        }
+
+        .details-btn {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+
+        /* Price Tag Styling */
+        .price-tag {
+            background: #2ecc71;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        /* Stock Styling */
+        .stock-low {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .stock-available {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        /* Animation for table rows */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        tbody tr {
+            animation: slideIn 0.5s ease forwards;
+        }
+
+        tbody tr:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        tbody tr:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            z-index: 50;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-open {
+            display: block;
+        }
+
+        /* Category Pills */
+        .category-pill {
+            display: inline-block;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .category-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Variant Cards */
+        .variant-card {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .variant-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar (unchanged) -->
+        <aside class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLuxe Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <a href="/admin/wallet"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💳</span> Wallet
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Products</h1>
+            </header>
+
+            <!-- Filter by Category -->
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-700 mb-3">Filter by Category</h3>
+                <div class="flex flex-wrap">
+                    <button class="category-pill category-filter active" data-category="all">All Products</button>
+                    {{range .Categories}}
+                    {{if .List}}
+                    <button class="category-pill category-filter" data-category="{{.ID}}">{{.CategoryName}}</button>
+                    {{end}}
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Premium Products Section -->
+            <section class="premium-table p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Product Management</h2>
+                    <a href="/admin/products/add"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-200">
+                        Add Product
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th>SI No</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Products}}
+                            <tr class="product-row" data-category="{{.CategoryID}}">
+                                <td>{{.ID}}</td>
+                                <td>{{.ProductName}}</td>
+                                <td>{{with .Category}}{{.CategoryName}}{{else}}N/A{{end}}</td>
+                                <td>
+                                    {{if gt (len .Description) 50}}
+                                    {{slice .Description 0 50}}...
+                                    {{else}}
+                                    {{.Description}}
+                                    {{end}}
+                                </td>
+                                <td>
+                                    {{with index .Variants 0}}
+                                    <span class="price-tag">₹{{printf "%.2f" .ActualPrice}}</span>
+                                    {{else}}
+                                    <span>N/A</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    {{if .Variants}}
+                                    {{if lt .TotalStock 10}}
+                                    <span class="stock-low">{{.TotalStock}} left</span>
+                                    {{else}}
+                                    <span class="stock-available">{{.TotalStock}} in stock</span>
+                                    {{end}}
+                                    {{else}}
+                                    <span>N/A</span>
+                                    {{end}}
+                                </td>
+                                <td class="status-text">{{if .IsActive}}Listed{{else}}Unlisted{{end}}</td>
+                                <td class="flex space-x-2">
+                                    <a href="/admin/products/edit/{{.ID}}" class="status-btn status-unblocked">Edit</a>
+                                    <button
+                                        class="status-btn {{if .IsActive}}status-blocked{{else}}status-unblocked{{end}} toggle-status"
+                                        data-product-id="{{.ID}}" data-is-active="{{.IsActive}}">
+                                        {{if .IsActive}}Unlist{{else}}List{{end}}
+                                    </button>
+                                    <button class="status-btn details-btn"
+                                        onclick="window.location.href='/admin/products/detail/{{.ID}}'">Details</button>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Product Details Modal -->
+    <div class="modal-overlay" id="productDetailsOverlay"></div>
+    <div class="modal" id="productDetailsModal">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modalProductName"></h3>
+                <button class="text-gray-500 hover:text-gray-700 text-2xl close-modal">&times;</button>
+            </div>
+            <div class="modal-content">
+                <div class="product-images mb-6 flex space-x-2 overflow-x-auto">
+                    <!-- Images will be inserted here -->
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">Brand</h4>
+                        <p id="modalBrand"></p>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-700 mb-2">Category</h4>
+                        <p id="modalCategory"></p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <h4 class="font-semibold text-gray-700 mb-2">Description</h4>
+                        <p id="modalDescription"></p>
+                    </div>
+                </div>
+
+                <h4 class="font-semibold text-gray-700 mb-2">Variants</h4>
+                <div id="modalVariants" class="space-y-3">
+                    <!-- Variants will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Toggle product status (List/Unlist)
+            document.querySelectorAll(".toggle-status").forEach(button => {
+                button.addEventListener("click", function () {
+                    const productId = this.getAttribute("data-product-id");
+                    const isActive = this.getAttribute("data-is-active") === "true";
+                    const statusCell = this.closest("tr").querySelector(".status-text");
+
+                    // Send AJAX request to update product status
+                    fetch(`/admin/products/toggle-status/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ isActive: !isActive })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Update UI
+                                if (isActive) {
+                                    this.textContent = "List";
+                                    this.classList.remove("status-blocked");
+                                    this.classList.add("status-unblocked");
+                                    statusCell.textContent = "Unlisted";
+                                    this.setAttribute("data-is-active", "false");
+                                } else {
+                                    this.textContent = "Unlist";
+                                    this.classList.add("status-blocked");
+                                    this.classList.remove("status-unblocked");
+                                    statusCell.textContent = "Listed";
+                                    this.setAttribute("data-is-active", "true");
+                                }
+                            } else {
+                                alert("Failed to update product status");
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert("An error occurred while updating product status");
+                        });
+                });
+            });
+
+            // Category filter functionality
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            const productRows = document.querySelectorAll('.product-row');
+
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', function () {
+                    const category = this.getAttribute('data-category');
+
+                    // Update active filter
+                    categoryFilters.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Filter products
+                    productRows.forEach(row => {
+                        if (category === 'all' || row.getAttribute('data-category') === category) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            });
+
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keyup', function () {
+                const searchText = this.value.toLowerCase();
+
+                productRows.forEach(row => {
+                    const productName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const categoryName = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+
+                    if (productName.includes(searchText) || categoryName.includes(searchText)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+            // Product details modal
+            const modal = document.getElementById('productDetailsModal');
+            const overlay = document.getElementById('productDetailsOverlay');
+            const closeModalButtons = document.querySelectorAll('.close-modal');
+
+            // Open modal and load product details
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
+
+                    // Fetch product details
+                    fetch(`/admin/products/get/${productId}`)
+                        .then(response => response.json())
+                        .then(product => {
+                            // Populate modal with product details
+                            document.getElementById('modalProductName').textContent = product.ProductName;
+                            document.getElementById('modalBrand').textContent = product.Brand;
+                            document.getElementById('modalCategory').textContent = product.Category.CategoryName;
+                            document.getElementById('modalDescription').textContent = product.Description;
+
+                            // Clear and populate images
+                            const imagesContainer = document.querySelector('.product-images');
+                            imagesContainer.innerHTML = '';
+
+                            if (product.Images && product.Images.length > 0) {
+                                product.Images.forEach(image => {
+                                    const imgElement = document.createElement('img');
+                                    imgElement.src = image.ImageURL;
+                                    imgElement.alt = product.ProductName;
+                                    imgElement.className = 'h-24 w-24 object-cover rounded-md';
+                                    imagesContainer.appendChild(imgElement);
+                                });
+                            } else {
+                                imagesContainer.innerHTML = '<p class="text-gray-500">No images available</p>';
+                            }
+
+                            // Clear and populate variants
+                            const variantsContainer = document.getElementById('modalVariants');
+                            variantsContainer.innerHTML = '';
+
+                            if (product.Variants && product.Variants.length > 0) {
+                                product.Variants.forEach(variant => {
+                                    const variantCard = document.createElement('div');
+                                    variantCard.className = 'variant-card';
+                                    variantCard.innerHTML = `
+                                    <div class="flex justify-between items-center">
+                                        <div>
+                                            <p class="font-medium">${variant.Size || 'Default'}</p>
+                                            <p class="text-blue-600 font-bold">₹${variant.Price}</p>
+                                        </div>
+                                        <div>
+                                            <p class="${variant.StockCount < 10 ? 'stock-low' : 'stock-available'}">
+                                                ${variant.StockCount} in stock
+                                            </p>
+                                            <p class="text-sm text-gray-500">
+                                                Status: ${variant.IsActive ? 'Active' : 'Inactive'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                `;
+                                    variantsContainer.appendChild(variantCard);
+                                });
+                            } else {
+                                variantsContainer.innerHTML = '<p class="text-gray-500">No variants available</p>';
+                            }
+
+                            // Show modal
+                            modal.classList.add('modal-open');
+                            overlay.classList.add('modal-open');
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Failed to load product details');
+                        });
+                });
+            });
+
+            // Close modal
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    modal.classList.remove('modal-open');
+                    overlay.classList.remove('modal-open');
+                });
+            });
+
+            // Close modal when clicking outside
+            overlay.addEventListener('click', function () {
+                modal.classList.remove('modal-open');
+                overlay.classList.remove('modal-open');
+            });
+        });
+    </script>
+</body>
+
+</html>

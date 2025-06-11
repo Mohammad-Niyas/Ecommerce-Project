@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.product.ProductName}} - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .logo-corner img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-corner img:hover {
+            transform: scale(1.05);
+        }
+
+        #categoriesDropdown {
+            z-index: 1000;
+        }
+
+        .product-detail-section {
+            background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+            padding: 5rem 0;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0.05em;
+        }
+
+        .product-image-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .product-image-container:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-product-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 15px;
+            cursor: crosshair;
+        }
+
+        .zoom-lens {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px solid #e63946;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+
+        .zoom-lens.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .zoom-container {
+            position: absolute;
+            top: 0;
+            left: 110%;
+            width: 400px;
+            height: 400px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+            border: 1px solid #e5e7eb;
+        }
+
+        .zoom-container.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .zoomed-image {
+            width: 1800px;
+            height: 1800px;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .product-image-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .thumbnail-image {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .thumbnail-image:hover,
+        .thumbnail-image.active {
+            border: 2px solid #e63946;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
+        }
+
+        .variant-option {
+            transition: all 0.3s ease;
+        }
+
+        .variant-option:hover {
+            background: #e63946;
+            color: #ffffff;
+        }
+
+        .variant-option.active {
+            background-color: #e63946;
+            color: #ffffff;
+            border: 2px solid #e63946;
+        }
+
+        .action-btn {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .breadcrumb {
+            font-family: 'Lora', serif;
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb a {
+            color: #6b7280;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #e63946;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 200px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .user-dropdown a {
+            display: block;
+            padding: 10px 15px;
+            color: #333333;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: #f1f1f1;
+            color: #e63946;
+        }
+
+        .user-icon-container {
+            position: relative;
+        }
+
+        .description-card {
+            background: linear-gradient(to bottom, #ffffff 0%, #f7f7f7 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 2.5rem;
+            margin-top: 3rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .description-card h2 {
+            position: relative;
+            display: inline-block;
+            padding-bottom: 0.5rem;
+        }
+
+        .description-card h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50%;
+            height: 2px;
+            background: #e63946;
+        }
+
+        .cart-badge {
+            background: #e63946;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-items {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 10px 0;
+            }
+
+            .dropdown {
+                width: 100%;
+                left: 0;
+            }
+
+            .product-image-sidebar {
+                flex-direction: row;
+                width: 100%;
+                max-height: 100px;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+
+            .zoom-container,
+            .zoom-lens {
+                display: none !important;
+            }
+
+            .description-card {
+                padding: 1.5rem;
+                margin-top: 2rem;
+            }
+        }
+
+        .discount-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            line-height: 1;
+        }
+
+        .offer-time {
+            font-size: 0.875rem;
+            color: #e63946;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .discount-badge {
+                top: 0.4rem;
+                right: 0.4rem;
+                font-size: 0.65rem;
+                padding: 0.2rem 0.4rem;
+            }
+
+            .offer-time {
+                font-size: 0.75rem;
+            }
+        }
+
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .popup.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .popup.success {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: #ffffff;
+        }
+
+        .popup.error {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+            color: #ffffff;
+        }
+
+        .popup .popup-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .popup .popup-content i {
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png"
+                                alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton"
+                            class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 focus:outline-none transition-all duration-300"
+                            aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown"
+                            class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{range .categories}}
+                            <a href="/product?category={{.ID}}"
+                                class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..."
+                            class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none search-input"
+                            id="searchInput">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button
+                            class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors"
+                            onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i
+                                class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i
+                                class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton"
+                                class="text-black hover:text-gray-600 transition-colors focus:outline-none"
+                                title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                {{if .isLoggedIn}}
+                                <a href="/profile" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
+                                    <span>User Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                                    <span>Logout</span>
+                                </a>
+                                {{else}}
+                                <a href="/signup" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-plus text-gray-600"></i>
+                                    <span>Sign Up</span>
+                                </a>
+                                <a href="/login" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-in-alt text-gray-600"></i>
+                                    <span>Login</span>
+                                </a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i
+                                    class="fas fa-shopping-bag text-xl"></i></a>
+                            <span id="cartBadge" class="cart-badge text-white hidden">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Product Detail Section -->
+    <!-- Product Detail Section -->
+    <section class="product-detail-section">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <nav class="breadcrumb">
+                <a href="/">Home</a> > <a href="/product">Products</a> > <span>{{.product.ProductName}}</span>
+            </nav>
+            <div class="flex flex-col lg:flex-row gap-12">
+                <div class="lg:w-1/2 flex gap-4">
+                    {{if .product.Images}}
+                    <div class="product-image-sidebar">
+                        {{range $index, $image := .product.Images}}
+                        <img src="{{$image.ImageURL}}" alt="{{$.product.ProductName}} - {{$index}}"
+                            class="thumbnail-image {{if eq $index 0}}active{{end}}" data-high-res="{{$image.ImageURL}}"
+                            onclick="changeMainImage('{{$image.ImageURL}}', '{{$image.ImageURL}}', this)">
+                        {{end}}
+                    </div>
+                    {{end}}
+                    <div class="product-image-container relative">
+                        {{if .product.Images}}
+                        <img src="{{(index .product.Images 0).ImageURL}}" alt="{{.product.ProductName}}"
+                            class="main-product-image">
+                        {{else}}
+                        <img src="https://via.placeholder.com/600x450" alt="{{.product.ProductName}}"
+                            class="main-product-image">
+                        {{end}}
+                        {{range $index, $variant := .variants}}
+                        {{if eq (printf "%d" $variant.Variant.ID) $.selectedVariantId}}
+                        {{if ne $variant.Discount 0.0}}
+                        <div class="discount-badge">{{printf "%.0f" $variant.Discount}}%</div>
+                        {{end}}
+                        {{end}}
+                        {{end}}
+                        <div class="zoom-lens"></div>
+                        <div class="zoom-container">
+                            {{if .product.Images}}
+                            <img src="{{(index .product.Images 0).ImageURL}}" alt="{{.product.ProductName}}"
+                                class="zoomed-image">
+                            {{else}}
+                            <img src="https://via.placeholder.com/1800x1800" alt="{{.product.ProductName}}"
+                                class="zoomed-image">
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <h1 class="section-title text-3xl font-bold text-gray-900 tracking-tight mb-4">
+                        {{.product.ProductName}}</h1>
+                    <input type="hidden" id="productId" name="product_id" value="{{.product.ID}}">
+                    {{if .variants}}
+                    <div class="mb-4">
+                        {{range $index, $variant := .variants}}
+                        {{if eq (printf "%d" $variant.Variant.ID) $.selectedVariantId}}
+                        <p class="text-gray-900 font-semibold text-2xl" id="variant-selling-price">
+                            ₹{{printf "%.2f" $variant.SellingPrice}}
+                        </p>
+                        {{if ne $variant.Discount 0.0}}
+                        <p class="line-through text-gray-500 font-medium text-lg" id="variant-actual-price">
+                            ₹{{printf "%.2f" $variant.Variant.ActualPrice}}
+                        </p>
+                        <p class="offer-time" id="offer-time">
+                            {{range $offer := $.product.ProductOffers}}
+                            {{if and (eq $offer.Status "Active") (gt $variant.Discount 0.0)}}
+                            Offer ends: {{$offer.EndDate.Format "Jan 02, 2006"}}
+                            {{break}}
+                            {{end}}
+                            {{end}}
+                            {{range $offer := $.product.Category.CategoryOffers}}
+                            {{if and (eq $offer.OfferStatus "Active") (gt $variant.Discount 0.0)}}
+                            Offer ends: {{$offer.EndDate.Format "Jan 02, 2006"}}
+                            {{break}}
+                            {{end}}
+                            {{end}}
+                        </p>
+                        {{end}}
+                        {{end}}
+                        {{end}}
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 font-['Lora'] mb-2">Select Variant</h3>
+                        <div class="flex flex-wrap space-x-3 gap-y-3">
+                            {{range $index, $variant := .variants}}
+                            <div class="text-center">
+                                <button data-variant-id="{{$variant.Variant.ID}}"
+                                    data-selling-price="{{$variant.SellingPrice}}"
+                                    data-actual-price="{{$variant.Variant.ActualPrice}}"
+                                    data-stock-count="{{$variant.Variant.StockCount}}"
+                                    data-discount="{{$variant.Discount}}"
+                                    data-offer-end="{{range $offer := $.product.ProductOffers}}{{if eq $offer.Status `Active`}}{{$offer.EndDate.Format `2006-01-02`}}{{break}}{{end}}{{end}}{{range $offer := $.product.Category.CategoryOffers}}{{if eq $offer.OfferStatus `Active`}}{{$offer.EndDate.Format `2006-01-02`}}{{break}}{{end}}{{end}}"
+                                    class="variant-option px-4 py-2 rounded-full text-sm font-['Lora'] transition-all duration-300 
+                                    {{if eq $variant.Variant.StockCount 0}}bg-gray-300 text-gray-500 cursor-not-allowed{{else if le $variant.Variant.StockCount 10}}bg-red-100 text-red-700 hover:bg-red-200{{else}}bg-gray-100 text-gray-800 hover:bg-gray-200{{end}} 
+                                    {{if eq (printf `%d` $variant.Variant.ID) $.selectedVariantId}}active{{end}}" {{if
+                                    eq $variant.Variant.StockCount 0}}disabled{{end}}
+                                    onclick="selectVariant('{{$variant.Variant.ID}}', this)">
+                                    {{if $variant.Variant.Size}}{{$variant.Variant.Size}}{{else}}Variant
+                                    {{$variant.Variant.ID}}{{end}}
+                                    {{if eq $variant.Variant.StockCount 0}} - Out of Stock{{end}}
+                                </button>
+                            </div>
+                            {{end}}
+                        </div>
+                        <p id="stock-status" class="text-xs mt-2 font-['Lora'] text-gray-600 hidden"></p>
+                        <input type="hidden" id="selectedVariantId" name="variant_id" value="{{.selectedVariantId}}">
+                    </div>
+                    {{end}}
+                    <div class="flex space-x-4">
+                        {{if .isLoggedIn}}
+                        <button id="add-to-cart-btn"
+                            class="action-btn bg-gradient-to-r from-gray-900 to-gray-700 text-white px-6 py-3 rounded-full text-sm font-medium uppercase tracking-wide hover:from-gray-800 hover:to-gray-600 transition-all duration-300 shadow-md">
+                            <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                        </button>
+                        <button id="add-to-wishlist-btn"
+                            class="action-btn bg-transparent border border-gray-700 text-gray-900 px-6 py-3 rounded-full text-sm font-medium uppercase tracking-wide hover:bg-gray-100 transition-all duration-300 shadow-md">
+                            <i class="far fa-heart mr-2"></i> Add to Wishlist
+                        </button>
+                        {{else}}
+                        <a href="/login"
+                            class="action-btn bg-gray-500 text-white px-6 py-3 rounded-full text-sm font-medium uppercase tracking-wide">
+                            <i class="fas fa-sign-in-alt mr-2"></i> Login to Add
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            {{if .product.Description}}
+            <div class="description-card">
+                <h2 class="section-title text-2xl font-bold text-gray-900 tracking-tight mb-4">Product Description</h2>
+                <p class="text-gray-700 text-base font-['Lora'] leading-relaxed">
+                    {{.product.Description}}
+                </p>
+            </div>
+            {{end}}
+        </div>
+    </section>
+<!-- Footer Section -->
+<footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4 max-w-5xl">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+                <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                <button
+                    class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                    <span>Contact Us</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+            <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+            <div class="flex items-center space-x-4">
+                <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                    class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                    alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                    alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                    class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+            </div>
+        </div>
+        <div class="text-center text-xs text-gray-500 mt-6">
+            © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+        </div>
+    </div>
+</footer>
+
+    <!-- Popup Notification -->
+    <div id="popup" class="popup hidden">
+        <div class="popup-content">
+            <i id="popup-icon" class="fas fa-check-circle"></i>
+            <span id="popup-message">Item added to wishlist successfully!</span>
+        </div>
+    </div>
+
+    {{if .isLoggedIn}}
+    <input type="hidden" id="jwtToken" value="{{.jwtToken}}">
+    {{end}}
+
+    <!-- JavaScript -->
+    <script>
+        // Navigation-related scripts
+        document.getElementById('categoriesButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('scale-y-100');
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'false' ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('categoriesButton');
+            const dropdown = document.getElementById('categoriesDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('scale-y-100');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('userButton').addEventListener('click', function (e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('userButton');
+            const dropdown = document.getElementById('userDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('active');
+            }
+        });
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            window.location.href = `/product?search=${encodeURIComponent(query)}`;
+        }
+
+        // Image zoom and thumbnail functionality
+        function changeMainImage(imageUrl, highResImageUrl, thumbnail) {
+            const mainImage = document.querySelector('.main-product-image');
+            const zoomedImage = document.querySelector('.zoomed-image');
+            mainImage.src = imageUrl;
+            zoomedImage.src = highResImageUrl || imageUrl;
+            document.querySelectorAll('.thumbnail-image').forEach(img => img.classList.remove('active'));
+            thumbnail.classList.add('active');
+            if (!isMobile()) setupZoom();
+        }
+
+        // Variant selection
+        document.querySelectorAll('.variant-option').forEach(button => {
+            if (button.disabled) {
+                button.addEventListener('click', (e) => e.preventDefault());
+            }
+        });
+
+        function selectVariant(variantId, button) {
+        if (button.disabled) return;
+
+        document.querySelectorAll('.variant-option').forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById('selectedVariantId').value = variantId;
+
+        const sellingPrice = button.getAttribute('data-selling-price');
+        const actualPrice = button.getAttribute('data-actual-price');
+        const stockCount = parseInt(button.getAttribute('data-stock-count'));
+        const discount = parseFloat(button.getAttribute('data-discount'));
+        const offerEnd = button.getAttribute('data-offer-end');
+        const sellingPriceElement = document.getElementById('variant-selling-price');
+        const actualPriceElement = document.getElementById('variant-actual-price');
+        const stockStatusElement = document.getElementById('stock-status');
+        const offerTimeElement = document.getElementById('offer-time');
+        let discountBadge = document.querySelector('.discount-badge');
+
+        sellingPriceElement.textContent = `₹${parseFloat(sellingPrice).toFixed(2)}`;
+        if (discount > 0) {
+            actualPriceElement.textContent = `₹${parseFloat(actualPrice).toFixed(2)}`;
+            actualPriceElement.style.display = 'block';
+            if (!discountBadge) {
+                discountBadge = document.createElement('div');
+                discountBadge.className = 'discount-badge';
+                document.querySelector('.product-image-container').appendChild(discountBadge);
+            }
+            discountBadge.textContent = `${Math.round(discount)}%`;
+            discountBadge.style.display = 'block';
+
+            if (offerEnd) {
+                const endDate = new Date(offerEnd).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+                offerTimeElement.textContent = `Offer ends: ${endDate}`;
+                offerTimeElement.style.display = 'block';
+            } else {
+                offerTimeElement.style.display = 'none';
+            }
+        } else {
+            actualPriceElement.style.display = 'none';
+            if (discountBadge) discountBadge.style.display = 'none';
+            offerTimeElement.style.display = 'none';
+        }
+
+        stockStatusElement.classList.remove('hidden');
+        stockStatusElement.textContent = stockCount === 0 ? 'Out of Stock' : `${stockCount} in stock`;
+        stockStatusElement.className = `text-xs mt-2 ${stockCount === 0 ? 'text-gray-500' : 'text-green-600'}`;
+    }
+
+        // Zoom functionality
+        const imageContainer = document.querySelector('.product-image-container');
+        const mainImage = document.querySelector('.main-product-image');
+        const zoomContainer = document.querySelector('.zoom-container');
+        const zoomedImage = document.querySelector('.zoomed-image');
+        const zoomLens = document.querySelector('.zoom-lens');
+        const zoomFactor = 3;
+
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        function setupZoom() {
+            if (!imageContainer || !mainImage || !zoomContainer || !zoomedImage || !zoomLens) return;
+            let lastMove = 0;
+            const throttleDelay = 16;
+
+            const handleZoom = (e) => {
+                const now = performance.now();
+                if (now - lastMove < throttleDelay) return;
+                lastMove = now;
+
+                requestAnimationFrame(() => {
+                    const rect = imageContainer.getBoundingClientRect();
+                    let x = e.clientX - rect.left;
+                    let y = e.clientY - rect.top;
+                    const lensWidth = zoomLens.offsetWidth;
+                    const lensHeight = zoomLens.offsetHeight;
+
+                    x = Math.max(lensWidth / 2, Math.min(x, rect.width - lensWidth / 2));
+                    y = Math.max(lensHeight / 2, Math.min(y, rect.height - lensHeight / 2));
+
+                    zoomLens.style.left = `${x - lensWidth / 2}px`;
+                    zoomLens.style.top = `${y - lensHeight / 2}px`;
+
+                    const ratioX = x / rect.width;
+                    const ratioY = y / rect.height;
+                    const zoomedWidth = zoomedImage.offsetWidth;
+                    const zoomedHeight = zoomedImage.offsetHeight;
+                    const zoomX = ratioX * zoomedWidth - zoomContainer.offsetWidth / 2;
+                    const zoomY = ratioY * zoomedHeight - zoomContainer.offsetHeight / 2;
+
+                    zoomedImage.style.transform = `translate(-${zoomX}px, -${zoomY}px)`;
+                });
+            };
+
+            imageContainer.addEventListener('mouseenter', () => {
+                zoomContainer.classList.add('active');
+                zoomLens.classList.add('active');
+            });
+            imageContainer.addEventListener('mousemove', handleZoom);
+            imageContainer.addEventListener('mouseleave', () => {
+                zoomContainer.classList.remove('active');
+                zoomLens.classList.remove('active');
+            });
+        }
+
+        if (!isMobile()) setupZoom();
+        window.addEventListener('resize', () => {
+            if (!isMobile()) setupZoom();
+            else {
+                zoomContainer.classList.remove('active');
+                zoomLens.classList.remove('active');
+            }
+        });
+
+        // Function to update cart badge
+    function updateCartBadge() {
+        const token = document.getElementById('jwtToken')?.value || 
+                      document.cookie.split('; ').find(row => row.startsWith('jwtTokensUser='))?.split('=')[1];
+        if (!token) {
+            document.getElementById('cartBadge').textContent = '0';
+            document.getElementById('cartBadge').classList.add('hidden');
+            return;
+        }
+
+        fetch('/cart', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                const itemCount = data.cart?.Items?.length || 0;
+                const badge = document.getElementById('cartBadge');
+                badge.textContent = itemCount;
+                if (itemCount > 0) {
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching cart:', error);
+                document.getElementById('cartBadge').textContent = '0';
+                document.getElementById('cartBadge').classList.add('hidden');
+            });
+    }
+
+        // Show Popup
+        // Show Popup
+    function showPopup(message, type = 'success') {
+        let popup = document.getElementById('popup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'popup';
+            popup.className = 'popup hidden';
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <i id="popup-icon" class="fas"></i>
+                    <span id="popup-message"></span>
+                </div>
+            `;
+            document.body.appendChild(popup);
+        }
+
+            const icon = document.getElementById('popup-icon');
+            const messageElement = document.getElementById('popup-message');
+            popup.className = `popup ${type}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}`;
+            messageElement.textContent = message;
+
+            popup.classList.remove('hidden');
+            popup.classList.add('show');
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+
+        // Add to Wishlist
+    function addToWishlist(productId, variantId) {
+        console.log('addToWishlist called - ProductID:', productId, 'VariantID:', variantId);
+
+        const token = document.getElementById('jwtToken')?.value || 
+                      document.cookie.split('; ').find(row => row.startsWith('jwtTokensUser='))?.split('=')[1];
+        console.log('Parsed Token:', token || 'No token found');
+
+        if (!token) {
+            console.log('No token detected, showing login prompt');
+            showPopup('Please login to add items to wishlist', 'error');
+            setTimeout(() => window.location.href = '/login', 1500);
+            return;
+        }
+
+        console.log('Sending fetch to /wishlist/add');
+        fetch('/wishlist/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                product_id: parseInt(productId),
+                variant_id: variantId ? parseInt(variantId) : 0
+            })
+        })
+            .then(response => {
+                console.log('Fetch Response Status:', response.status);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetch Response Data:', data);
+                if (data.status === 'Success') {
+                    showPopup(data.message || 'Item added to wishlist successfully!', 'success');
+                } else {
+                    showPopup('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                showPopup('An error occurred while adding to wishlist.', 'error');
+            });
+    }
+
+        // Consolidated DOMContentLoaded listener
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOM fully loaded');
+
+        // Initialize selected variant
+        const selectedVariantId = '{{.selectedVariantId}}';
+        if (selectedVariantId) {
+            const button = document.querySelector(`.variant-option[data-variant-id="${selectedVariantId}"]`);
+            if (button) {
+                console.log('Initializing selected variant:', selectedVariantId);
+                selectVariant(selectedVariantId, button);
+            }
+        }
+
+        // Update cart badge
+        updateCartBadge();
+
+        // Add to Wishlist Listener
+        const wishlistBtn = document.getElementById('add-to-wishlist-btn');
+        if (wishlistBtn) {
+            console.log('Wishlist button found, attaching listener');
+            wishlistBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const productId = document.getElementById('productId').value;
+                const variantId = document.getElementById('selectedVariantId').value;
+                console.log('Wishlist button clicked - ProductID:', productId, 'VariantID:', variantId);
+                addToWishlist(productId, variantId);
+            });
+        } else {
+            console.error('Wishlist button not found in DOM');
+        }
+
+        // Add to Cart Listener
+        const cartBtn = document.getElementById('add-to-cart-btn');
+        if (cartBtn) {
+            console.log('Cart button found, attaching listener');
+            cartBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                console.log("Add to Cart clicked");
+                const productId = document.getElementById('productId').value;
+                const variantId = document.getElementById('selectedVariantId').value;
+                const token = document.getElementById('jwtToken')?.value || 
+                              document.cookie.split('; ').find(row => row.startsWith('jwtTokensUser='))?.split('=')[1];
+                console.log('Parsed Token:', token || 'No token found');
+                console.log("Product ID:", productId, "Variant ID:", variantId);
+
+                if (!token) {
+                    console.log('No token detected, showing login prompt');
+                    showPopup('Please login to add items to cart', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                console.log("Sending fetch to /cart/add");
+                fetch('/cart/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        product_id: parseInt(productId),
+                        variant_id: variantId ? parseInt(variantId) : 0,
+                        quantity: 1
+                    })
+                })
+                    .then(response => {
+                        console.log("Response Status:", response.status);
+                        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Response Data:", data);
+                        if (data.status === "Success") {
+                            showPopup('Item added to cart successfully!', 'success');
+                            updateCartBadge();
+                        } else {
+                            showPopup('Failed to add item to cart: ' + data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fetch Error:', error);
+                        showPopup('An error occurred while adding to cart.', 'error');
+                    });
+            });
+        } else {
+            console.error('Add to Cart button not found in DOM');
+        }
+    });
+    </script>
+</body>
+
+</html>

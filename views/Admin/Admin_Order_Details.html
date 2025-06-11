@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Order #{{.OrderUID}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg p-6 fixed h-full">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLux Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 ml-64 p-8 overflow-y-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Order #{{.OrderUID}}</h1>
+            </div>
+
+            <!-- Order Details Container -->
+            <div class="space-y-6">
+                <!-- Customer Information -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Customer Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                        <p><span class="font-medium">Name:</span> {{.ShippingAddress.FirstName}} {{.ShippingAddress.LastName}}</p>
+                        <p><span class="font-medium">Email:</span> {{if .ShippingAddress.Email}}{{.ShippingAddress.Email}}{{else}}N/A{{end}}</p>
+                        <p><span class="font-medium">Phone:</span> {{.ShippingAddress.PhoneNumber}}</p>
+                        <p><span class="font-medium">Alternate Phone:</span> {{if .ShippingAddress.AlternatePhone}}{{.ShippingAddress.AlternatePhone}}{{else}}N/A{{end}}</p>
+                        <p><span class="font-medium">Address:</span> {{.ShippingAddress.AddressLine}}, {{.ShippingAddress.City}}, {{.ShippingAddress.State}} {{.ShippingAddress.Postcode}}, {{.ShippingAddress.Country}}</p>
+                        <p><span class="font-medium">Landmark:</span> {{if .ShippingAddress.Landmark}}{{.ShippingAddress.Landmark}}{{else}}N/A{{end}}</p>
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Order Items</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50">
+                                <tr class="text-gray-600">
+                                    <th class="py-3 px-4">Product</th>
+                                    <th class="py-3 px-4">Size</th>
+                                    <th class="py-3 px-4">Quantity</th>
+                                    <th class="py-3 px-4">Price</th>
+                                    <th class="py-3 px-4">Total</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .OrderItems}}
+                                <tr class="border-t">
+                                    <td class="py-3 px-4">{{.ProductName}}</td>
+                                    <td class="py-3 px-4">{{.Size}}</td>
+                                    <td class="py-3 px-4">{{.Quantity}}</td>
+                                    <td class="py-3 px-4">₹{{printf "%.2f" .ProductSellPrice}}</td>
+                                    <td class="py-3 px-4">₹{{printf "%.2f" .Total}}</td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded-lg text-white {{if eq .OrderStatus `Processing`}}bg-yellow-500{{else if eq .OrderStatus `Out for Delivery`}}bg-purple-500{{else if eq .OrderStatus `Shipped`}}bg-green-500{{else if eq .OrderStatus `Delivered`}}bg-blue-500{{else if eq .OrderStatus `Cancelled`}}bg-red-500{{else if eq .OrderStatus `Pending`}}bg-orange-500{{else}}bg-gray-500{{end}}">
+                                            {{.OrderStatus}}
+                                        </span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        <form class="update-status-form" method="POST" action="/admin/order/update">
+                                            <input type="hidden" name="order_id" value="{{$.OrderUID}}">
+                                            <input type="hidden" name="item_id" value="{{.ID}}">
+                                            <select name="status" class="p-2 border rounded-lg mr-2 {{if or (eq .OrderStatus `Delivered`) (eq .OrderStatus `Cancelled`)}}cursor-not-allowed opacity-50{{end}}" {{if or (eq .OrderStatus `Delivered`) (eq .OrderStatus `Cancelled`)}}disabled{{end}}>
+                                                <option value="Processing" {{if eq .OrderStatus "Processing"}}selected{{end}}>Processing</option>
+                                                <option value="Shipped" {{if eq .OrderStatus "Shipped"}}selected{{end}}>Shipped</option>
+                                                <option value="Out for Delivery" {{if eq .OrderStatus "Out for Delivery"}}selected{{end}}>Out for Delivery</option>
+                                                <option value="Delivered" {{if eq .OrderStatus "Delivered"}}selected{{end}}>Delivered</option>
+                                                <option value="Cancelled" {{if eq .OrderStatus "Cancelled"}}selected{{end}}>Cancelled</option>
+                                            </select>
+                                            <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 {{if or (eq .OrderStatus `Delivered`) (eq .OrderStatus `Cancelled`)}}cursor-not-allowed opacity-50{{end}}" {{if or (eq .OrderStatus `Delivered`) (eq .OrderStatus `Cancelled`)}}disabled{{end}}>
+                                                Update
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+                    <div class="space-y-2 text-gray-700">
+                        <p class="flex justify-between"><span>Subtotal:</span><span>₹{{printf "%.2f" .SubTotal}}</span></p>
+                        <p class="flex justify-between"><span>Discount:</span><span>-₹{{printf "%.2f" .TotalDiscount}}</span></p>
+                        {{if .Coupon.ID}}
+                        <p class="flex justify-between text-green-600"><span>Coupon ({{.Coupon.CouponCode}}):</span><span>-₹{{printf "%.2f" .CouponDiscount}}</span></p>
+                        {{end}}
+                        <p class="flex justify-between"><span>Shipping Charge:</span><span>₹{{printf "%.2f" .ShippingCharge}}</span></p>
+                        <p class="flex justify-between"><span>Tax:</span><span>₹{{printf "%.2f" .Tax}}</span></p>
+                        <p class="flex justify-between font-semibold"><span>Total Amount:</span><span>₹{{printf "%.2f" .TotalAmount}}</span></p>
+                    </div>
+                </div>
+
+                <!-- Return Requests -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Return Requests</h2>
+                    {{if .ReturnRequests}}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50">
+                                <tr class="text-gray-600">
+                                    <th class="py-3 px-4">Request ID</th>
+                                    <th class="py-3 px-4">Product</th>
+                                    <th class="py-3 px-4">Reason</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .ReturnRequests}}
+                                <tr class="border-t">
+                                    <td class="py-3 px-4">{{.RequestUID}}</td>
+                                    <td class="py-3 px-4">{{.OrderItem.ProductName}}</td>
+                                    <td class="py-3 px-4">{{.Reason}}</td>
+                                    <td class="py-3 px-4">
+                                        <span class="px-2 py-1 rounded-lg text-white {{if eq .Status `pending`}}bg-yellow-500{{else if eq .Status `approved`}}bg-green-500{{else if eq .Status `cancelled`}}bg-red-500{{end}}">{{.Status}}</span>
+                                    </td>
+                                    <td class="py-3 px-4">
+                                        {{if eq .Status "pending"}}
+                                        <button class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600 mr-2" onclick="handleReturnAction('{{$.OrderUID}}', '{{.ID}}', 'approve')">Approve</button>
+                                        <button class="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600" onclick="handleReturnAction('{{$.OrderUID}}', '{{.ID}}', 'cancel')">Cancel</button>
+                                        {{end}}
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    {{else}}
+                    <p class="text-gray-500">No return requests for this order.</p>
+                    {{end}}
+                </div>
+
+                <!-- Payment and Delivery Details -->
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment & Delivery</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                        <div>
+                            <p><span class="font-medium">Payment Method:</span> {{.PaymentDetails.PaymentMethod}}</p>
+                            <p><span class="font-medium">Payment Status:</span> 
+                                <span class="px-2 py-1 rounded-lg text-white {{if eq .PaymentDetails.PaymentStatus `Completed`}}bg-green-500{{else if eq .PaymentDetails.PaymentStatus `Pending`}}bg-yellow-500{{else if eq .PaymentDetails.PaymentStatus `Failed`}}bg-red-500{{else}}bg-gray-500{{end}}">
+                                    {{.PaymentDetails.PaymentStatus}}
+                                </span>
+                            </p>
+                            <p><span class="font-medium">Payment Date:</span> {{if .PaymentDetails.PaymentDate.IsZero}}N/A{{else}}{{.PaymentDetails.PaymentDate.Format "02 Jan 2006"}}{{end}}</p>
+                        </div>
+                        <div>
+                            <p><span class="font-medium">Total Amount:</span> ₹{{printf "%.2f" .TotalAmount}}</p>
+                            <p><span class="font-medium">Expected Delivery:</span> {{.ExpectedDelivery}}</p>
+                            <p><span class="font-medium">Overall Status:</span> 
+                                <span class="px-2 py-1 rounded-lg text-white {{if eq .OverallStatus `Processing`}}bg-yellow-500{{else if eq .OverallStatus `Out for Delivery`}}bg-purple-500{{else if eq .OverallStatus `Shipped`}}bg-green-500{{else if eq .OverallStatus `Delivered`}}bg-blue-500{{else if eq .OverallStatus `Cancelled`}}bg-red-500{{else}}bg-gray-500{{end}}">
+                                    {{.OverallStatus}}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.update-status-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('/admin/order/update', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Order status updated successfully');
+                        location.reload();
+                    } else {
+                        alert('Failed to update status: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Error: ' + error.message));
+            });
+        });
+
+        function handleReturnAction(orderId, requestId, action) {
+            if (!confirm(`Are you sure you want to ${action} this return request?`)) return;
+
+            const formData = new FormData();
+            formData.append("order_id", orderId);
+            formData.append("request_id", requestId);
+            formData.append("action", action);
+
+            fetch('/admin/return/action', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`Return request ${action}ed successfully`);
+                    location.reload();
+                } else {
+                    alert(`Failed to ${action} return request: ` + data.message);
+                }
+            })
+            .catch(error => alert('Error: ' + error.message));
+        }
+    </script>
+</body>
+</html>

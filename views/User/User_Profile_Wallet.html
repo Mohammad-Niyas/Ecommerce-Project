@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #f8f8f8 0%, #ffffff 100%);
+            color: #2d2d2d;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .logo-corner img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-corner img:hover {
+            transform: scale(1.05);
+        }
+
+        #categoriesDropdown {
+            z-index: 1000;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 220px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #2d2d2d;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .settings-container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 50px auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: row;
+            gap: 2.5rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
+        }
+
+        .settings-sidebar {
+            flex: 1;
+            background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+            padding: 2.5rem;
+            border-right: 1px solid #e8e8e8;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-img {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            border-radius: 50%;
+            display: inline-block;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+            object-fit: cover;
+            border: 2px solid #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .profile h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.2rem;
+            text-decoration: none;
+            color: #4b4b4b;
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu a:hover {
+            background: #e0e0e0;
+            color: #000000;
+            transform: translateX(5px);
+        }
+
+        .menu a.active {
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .menu a i {
+            margin-right: 0.75rem;
+            color: #6b6b6b;
+            transition: color 0.3s ease;
+        }
+
+        .menu a:hover i,
+        .menu a.active i {
+            color: #000000;
+        }
+
+        .menu a.active i {
+            color: #ffffff;
+        }
+
+        .settings-content {
+            flex: 2;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(to right, #333333, #000000);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Wallet Styling */
+        .wallet-container {
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+        }
+
+        .wallet-balance {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .wallet-balance h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .wallet-balance-amount {
+            font-size: 2rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.3rem 1rem;
+            border-radius: 8px;
+        }
+
+        .add-funds-btn {
+            padding: 0.6rem 1.5rem;
+            background: #ffffff;
+            color: #333333;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-funds-btn:hover {
+            background: #e8e8e8;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .transaction-history {
+            margin-top: 1.5rem;
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .transaction-header h4 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .transaction-filter {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transaction-filter select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #4b4b4b;
+        }
+
+        .transaction-filter button {
+            padding: 0.5rem 1rem;
+            background: #333333;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .transaction-filter button:hover {
+            background: #000000;
+        }
+
+        .transaction-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .transaction-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .transaction-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .transaction-type {
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+        }
+
+        .transaction-type.debit {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .transaction-type.credit {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+        }
+
+        .transaction-status {
+            font-size: 0.8rem;
+            font-weight: 400;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            background: #e8e8e8;
+            color: #4b4b4b;
+        }
+
+        .transaction-status.Pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .transaction-status.Completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .transaction-status.Failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .transaction-date {
+            font-size: 0.9rem;
+            color: #6b6b6b;
+        }
+
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .transaction-description {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #2d2d2d;
+            flex: 2;
+            word-break: break-word;
+        }
+
+        .transaction-description a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .transaction-description a:hover {
+            text-decoration: underline;
+        }
+
+        .transaction-amount {
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: right;
+            flex: 1;
+        }
+
+        .transaction-amount.debit {
+            color: #dc3545;
+        }
+
+        .transaction-amount.credit {
+            color: #28a745;
+        }
+
+        .empty-wallet {
+            text-align: center;
+            color: #6b6b6b;
+            font-size: 1.1rem;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                flex-direction: column;
+                margin: 20px auto;
+                padding: 1rem;
+                width: 95%;
+            }
+
+            .settings-sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e8e8e8;
+            }
+
+            .profile-img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .profile h3 {
+                font-size: 1.6rem;
+            }
+
+            .menu a {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.9rem;
+            }
+
+            .wallet-balance {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .wallet-balance h3 {
+                font-size: 1.5rem;
+            }
+
+            .wallet-balance-amount {
+                font-size: 1.8rem;
+            }
+
+            .add-funds-btn {
+                padding: 0.5rem 1.2rem;
+                font-size: 0.85rem;
+            }
+
+            .transaction-card {
+                padding: 1rem;
+            }
+
+            .transaction-header-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .transaction-details {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .transaction-amount {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar (unchanged) -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton" class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:outline-none transition-all duration-300" aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown" class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{range .categories}}
+                            <a href="/product?category={{.ID}}" class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..." class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none search-input" id="searchInput">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors" onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton" class="text-black hover:text-gray-600 transition-colors focus:outline-none" title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                {{if .isLoggedIn}}
+                                <a href="/profile" class="flex items-center space-x-2" data-page="profile">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
+                                    <span>User Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                                    <span>Logout</span>
+                                </a>
+                                {{else}}
+                                <a href="/signup" class="flex items-center space-x-2">
+                                    <i class="fas fa-user-plus text-gray-600"></i>
+                                    <span>Sign Up</span>
+                                </a>
+                                <a href="/login" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-in-alt text-gray-600"></i>
+                                    <span>Login</span>
+                                </a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i class="fas fa-shopping-bag text-xl"></i></a>
+                            <span class="absolute -top-2 -right-2 text-white cart-badge flex items-center justify-center"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Section -->
+    <section class="py-12">
+        <div class="settings-container">
+            <div class="settings-sidebar">
+                <div class="profile">
+                    <div class="profile-img">
+                        {{if .userImage}}
+                        <img src="{{.userImage}}" alt="Profile Image" style="width: 100%; height: 100%; border-radius: 50%;">
+                        {{else}}
+                        <div style="width: 100%; height: 100%; border-radius: 50%; background: #ccc;"></div>
+                        {{end}}
+                    </div>
+                    <h3>Hello! {{.username}}</h3>
+                </div>
+                <div class="menu">
+                    <a href="/profile" data-page="profile"><i class="fas fa-user"></i> Personal Information</a>
+                    <a href="/orders" data-page="orders"><i class="fas fa-box"></i> My Orders</a>
+                    <a href="/wishlist" data-page="wishlist"><i class="far fa-heart"></i> Wishlist</a>
+                    <a href="/cart" data-page="cart"><i class="fas fa-shopping-cart"></i> Shopping Cart</a>
+                    <a href="/wallet" data-page="wallet" class="active"><i class="fas fa-wallet"></i> Wallet</a>
+                    <a href="/address" data-page="addresses"><i class="fas fa-map-marker-alt"></i> Manage Address</a>
+                    <a href="/settings" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            <div class="settings-content">
+                <h2 class="section-title">Wallet</h2>
+                <div class="content-section active" id="wallet-section">
+                    <div class="wallet-container">
+                        <div class="wallet-balance">
+                            <h3>Your Balance</h3>
+                            <div class="wallet-balance-amount">₹{{printf "%.2f" .wallet.Balance}}</div>
+                            <button class="add-funds-btn" id="add-funds-btn">Add Funds</button>
+                        </div>
+                        <div class="transaction-history">
+                            <div class="transaction-header">
+                                <h4>Transaction History</h4>
+                                <div class="transaction-filter">
+                                    <select id="transactionFilter" onchange="filterTransactions()">
+                                        <option value="all">All Transactions</option>
+                                        <option value="Credit">Credits</option>
+                                        <option value="Debit">Debits</option>
+                                    </select>
+                                    <button onclick="filterTransactions()">Apply</button>
+                                </div>
+                            </div>
+                            {{if .transactions}}
+                            <div id="transactionList">
+                                {{range .transactions}}
+                                <div class="transaction-card" data-type="{{.TransactionType}}">
+                                    <div class="transaction-header-row">
+                                        <span class="transaction-type {{.TransactionType}}">
+                                            {{if eq .TransactionType "Debit"}}Debit{{else}}Credit{{end}}
+                                        </span>
+                                        <span class="transaction-date">{{.TransactionDate.Format "Jan 02, 2006"}}</span>
+                                        <span class="transaction-status {{.TransactionStatus}}">{{.TransactionStatus}}</span>
+                                    </div>
+                                    <div class="transaction-details">
+                                        <span class="transaction-description">{{.Description}}</span>
+                                        <span class="transaction-amount {{.TransactionType}}">
+                                            {{if eq .TransactionType "Credit"}}+₹{{else}}-₹{{end}}{{printf "%.2f" .TransactionAmount}}
+                                        </span>
+                                    </div>
+                                </div>
+                                {{end}}
+                            </div>
+                            {{else}}
+                            <p class="empty-wallet">No transactions yet. Add funds or make a purchase to get started!</p>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        document.getElementById('categoriesButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('scale-y-100');
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'false' ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('categoriesButton');
+            const dropdown = document.getElementById('categoriesDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('scale-y-100');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('userButton').addEventListener('click', function (e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('userButton');
+            const dropdown = document.getElementById('userDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('active');
+            }
+        });
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            window.location.href = `/product?search=${encodeURIComponent(query)}`;
+        }
+
+        function filterTransactions() {
+            const filter = document.getElementById('transactionFilter').value;
+            const transactions = document.querySelectorAll('.transaction-card');
+            transactions.forEach(card => {
+                const type = card.getAttribute('data-type');
+                if (filter === 'all' || type === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        {{if .isLoggedIn}}
+        document.addEventListener('DOMContentLoaded', function () {
+            const addFundsBtn = document.getElementById('add-funds-btn');
+            addFundsBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const amount = prompt('Enter amount to add to your wallet (e.g., 100.00):');
+                if (!amount || isNaN(amount) || amount <= 0) {
+                    alert('Please enter a valid amount.');
+                    return;
+                }
+
+                fetch('/wallet/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `amount=${encodeURIComponent(amount)}`,
+                    credentials: 'include'
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'Success') {
+                        const options = {
+                            key: data.key,
+                            amount: data.amount,
+                            currency: data.currency,
+                            order_id: data.razorpay_order_id,
+                            name: 'VogueLuxe Wallet',
+                            description: 'Add funds to your wallet',
+                            handler: function (response) {
+                                fetch('/wallet/confirm', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: `transaction_id=${encodeURIComponent(data.transaction_id)}&razorpay_payment_id=${encodeURIComponent(response.razorpay_payment_id)}&razorpay_order_id=${encodeURIComponent(response.razorpay_order_id)}&razorpay_signature=${encodeURIComponent(response.razorpay_signature)}`,
+                                    credentials: 'include'
+                                })
+                                .then(resp => resp.json())
+                                .then(result => {
+                                    window.location.href = result.redirectURL;
+                                })
+                                .catch(err => alert('Error confirming payment: ' + err.message));
+                            },
+                            prefill: {
+                                name: "{{.username}}",
+                                email: "{{if .userEmail}}{{.userEmail}}{{else}}customer@example.com{{end}}",
+                            },
+                            theme: { color: '#333333' }
+                        };
+
+                        const rzp = new Razorpay(options);
+                        rzp.on('payment.failed', function (response) {
+                            fetch('/wallet/confirm', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded',
+                                },
+                                body: `transaction_id=${encodeURIComponent(data.transaction_id)}&razorpay_payment_id=${encodeURIComponent(response.error.metadata.payment_id)}&razorpay_order_id=${encodeURIComponent(response.error.metadata.order_id)}&razorpay_signature=&error=${encodeURIComponent(response.error.description)}`,
+                                credentials: 'include'
+                            })
+                            .then(resp => resp.json())
+                            .then(result => window.location.href = result.redirectURL)
+                            .catch(err => alert('Error handling payment failure: ' + err.message));
+                        });
+                        rzp.open();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => alert('Error initiating payment: ' + error.message));
+            });
+        });
+        {{end}}
+    </script>
+</body>
+</html>

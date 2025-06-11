@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Edit Coupon</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .error-text { color: #ef4444; font-size: 0.875rem; }
+        .error-border { border-color: #ef4444; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="/static/images/Logo.svg" alt="VogueLux Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Edit Coupon</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin/coupon/management" class="text-blue-500 hover:underline">Back to Coupon Management</a>
+                    <img src="/static/images/pexels-christina-morillo-1181690-1.jpg" alt="User Profile" class="rounded-full h-10 w-10">
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {{if .Message}}
+            <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">{{.Message}}</div>
+            {{end}}
+            {{if .Error}}
+            <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">{{.Error}}</div>
+            {{end}}
+
+            <!-- Edit Coupon Form -->
+            <div class="bg-white p-6 rounded-lg shadow max-w-md mx-auto">
+                <h2 class="text-lg font-semibold mb-4">Edit Coupon: {{.Coupon.CouponCode}}</h2>
+                <form id="edit-coupon-form" action="/admin/coupon/update/{{.Coupon.ID}}" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Coupon Code</label>
+                        <input type="text" name="coupon_code" value="{{.Coupon.CouponCode}}" class="w-full p-2 border rounded-lg" placeholder="e.g., SAVE10" required>
+                        <div class="error-text" id="coupon_code_error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Discount (%)</label>
+                        <input type="number" name="discount" step="0.01" min="0" max="100" value="{{printf "%.2f" .Coupon.Discount}}" class="w-full p-2 border rounded-lg" placeholder="e.g., 10.00" required>
+                        <div class="error-text" id="discount_error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Minimum Amount (₹)</label>
+                        <input type="number" name="min_amount" step="0.01" min="0" value="{{printf "%.2f" .Coupon.MinAmount}}" class="w-full p-2 border rounded-lg" placeholder="e.g., 500.00" required>
+                        <div class="error-text" id="min_amount_error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Maximum Amount (₹)</label>
+                        <input type="number" name="max_amount" step="0.01" min="0" value="{{if gt .Coupon.MaxAmount 0.0}}{{printf "%.2f" .Coupon.MaxAmount}}{{end}}" class="w-full p-2 border rounded-lg" placeholder="e.g., 1000.00 (optional)">
+                        <div class="error-text" id="max_amount_error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Usage Limit</label>
+                        <input type="number" name="usage_limit" min="1" value="{{.Coupon.UsageLimit}}" class="w-full p-2 border rounded-lg" placeholder="e.g., 100" required>
+                        <div class="error-text" id="usage_limit_error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Expiration Date</label>
+                        <input type="date" name="expiration_date" value="{{.Coupon.ExpirationDate.Format "2006-01-02"}}" class="w-full p-2 border rounded-lg" required>
+                        <div class="error-text" id="expiration_date_error"></div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Update Coupon</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('edit-coupon-form');
+
+        // Real-time validation
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => validateField(input));
+        });
+
+        function validateField(input) {
+            const name = input.name;
+            const value = input.value.trim();
+            const errorDiv = document.getElementById(`${name}_error`);
+            errorDiv.textContent = '';
+            input.classList.remove('error-border');
+
+            if (!value && input.required) {
+                errorDiv.textContent = `${name.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())} is required`;
+                input.classList.add('error-border');
+                return false;
+            }
+
+            switch (name) {
+                case 'coupon_code':
+                    if (!/^[A-Za-z0-9]{4,50}$/.test(value)) {
+                        errorDiv.textContent = 'Coupon code must be 4-50 alphanumeric characters (no spaces or special characters)';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'discount':
+                    const discount = parseFloat(value);
+                    if (isNaN(discount) || discount <= 0 || discount > 100) {
+                        errorDiv.textContent = 'Discount must be between 0.01 and 100';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'min_amount':
+                    const minAmount = parseFloat(value);
+                    if (isNaN(minAmount) || minAmount < 0) {
+                        errorDiv.textContent = 'Minimum amount must be non-negative';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'max_amount':
+                    const maxAmount = parseFloat(value);
+                    const minAmountInput = form.querySelector('input[name="min_amount"]').value.trim();
+                    const minAmountValue = parseFloat(minAmountInput) || 0;
+                    if (value && (isNaN(maxAmount) || maxAmount < 0 || (maxAmount > 0 && maxAmount < minAmountValue))) {
+                        errorDiv.textContent = 'Maximum amount must be non-negative and >= minimum amount';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'usage_limit':
+                    const usageLimit = parseInt(value);
+                    if (isNaN(usageLimit) || usageLimit <= 0) {
+                        errorDiv.textContent = 'Usage limit must be a positive integer';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'expiration_date':
+                    const date = new Date(value);
+                    if (isNaN(date.getTime()) || date < new Date()) {
+                        errorDiv.textContent = 'Expiration date must be in the future';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!validateField(input)) isValid = false;
+            });
+
+            if (isValid) {
+                const formData = new FormData(form);
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                }).then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error('Failed to update coupon: ' + text);
+                        });
+                    }
+                }).catch(error => {
+                    alert(error.message);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

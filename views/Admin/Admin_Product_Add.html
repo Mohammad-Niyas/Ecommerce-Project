@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        .monochrome-gradient { background: linear-gradient(135deg, #ffffff 0%, #e6e6e6 100%); }
+        .monochrome-card { box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.5), 0 8px 10px -6px rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(0, 0, 0, 0.05); }
+        .monochrome-button { background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; }
+        .monochrome-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .monochrome-button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .monochrome-input { transition: all 0.3s ease; border: 1px solid rgba(0, 0, 0, 0.1); }
+        .monochrome-input:focus { border-color: #000000; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.2); }
+        .image-card { border: 1px solid rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .image-card:hover { transform: scale(1.03); box-shadow: 0 20px 25px -5px rgba(255, 255, 255, 0.3), 0 10px 10px -5px rgba(255, 255, 255, 0.2); }
+        .variant-card { border-left: 3px solid #000000; transition: all 0.3s ease; }
+        .variant-card:hover { background-color: rgba(0, 0, 0, 0.05); }
+        .delete-button { background: rgba(0, 0, 0, 0.2); transition: all 0.2s ease; }
+        .delete-button:hover { background: rgba(0, 0, 0, 0.3); transform: scale(1.1); }
+        .crop-container { max-height: 70vh; max-width: 90vw; }
+        select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='black'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1.5em; }
+        .error-border { border-color: #ef4444; }
+        .error-text { color: #ef4444; font-size: 0.875rem; }
+    </style>
+</head>
+<body class="bg-white text-black min-h-screen p-4 md:p-8">
+    <div class="max-w-5xl mx-auto monochrome-gradient rounded-xl monochrome-card overflow-hidden">
+        <div class="p-2 bg-gradient-to-r from-black to-gray-700">
+            <h1 class="text-2xl font-bold text-white text-center">ADD NEW PRODUCT</h1>
+        </div>
+        {{if .Message}}
+        <div class="bg-green-100 text-green-700 p-2 rounded mb-4">{{.Message}}</div>
+        {{end}}
+        {{if .Error}}
+        <div class="bg-red-100 text-red-700 p-2 rounded mb-4">{{.Error}}</div>
+        {{end}}
+
+        <div class="p-6 md:p-8">
+            <form id="product-form" enctype="multipart/form-data">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium mb-2 text-black" for="productName">Product Name</label>
+                        <input type="text" id="productName" name="product_name" value="{{.ProductName}}"
+                            class="w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black"
+                            placeholder="Enter premium product name" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-black" for="category">Category</label>
+                        <select id="category" name="category_id"
+                            class="w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black pr-10"
+                            required>
+                            <option value="" disabled {{if not .CategoryID}}selected{{end}}>Select a category</option>
+                            {{range .Category}}
+                            <option value="{{.ID}}" {{if eq .ID $.CategoryID}}selected{{end}}>{{.CategoryName}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-black" for="brand">Brand</label>
+                        <input type="text" id="brand" name="brand" value="{{.Brand}}"
+                            class="w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black"
+                            placeholder="Enter brand name" required>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium mb-2 text-black" for="description">Description</label>
+                        <textarea id="description" name="description"
+                            class="w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black resize-y"
+                            placeholder="Enter detailed product description" rows="4"
+                            required>{{.Description}}</textarea>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-lg font-medium text-black">Product Images (Minimum 3)</label>
+                        <input type="file" id="image-upload" accept="image/*" class="hidden" multiple>
+                        <button type="button" onclick="document.getElementById('image-upload').click()"
+                            class="monochrome-button text-white px-5 py-2 rounded-lg font-medium">
+                            Upload Images
+                        </button>
+                    </div>
+                    <div id="image-preview" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4"></div>
+                    <div class="mt-4 p-6 border border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-white bg-opacity-50">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-black" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <p class="mt-1 text-sm text-black">Drag and drop images or click the upload button</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <label class="block text-lg font-medium text-black">Size Variants</label>
+                        <button type="button" id="add-variant" class="monochrome-button text-white px-5 py-2 rounded-lg font-medium">
+                            Add New Variant
+                        </button>
+                    </div>
+                    <div id="variants-container" class="space-y-4"></div>
+                </div>
+
+                <div class="text-center mt-10">
+                    <button type="submit" id="add-product"
+                        class="monochrome-button text-white px-10 py-3 rounded-lg font-bold text-lg transform transition duration-300">
+                        ADD PRODUCT
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="crop-modal" class="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-xl monochrome-card w-full max-w-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-black">Crop Image</h3>
+                <button id="close-crop" class="text-black hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="crop-container overflow-hidden rounded-lg mb-4">
+                <img id="image-to-crop" class="max-w-full">
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="crop-cancel" class="bg-white border border-black text-black px-5 py-2 rounded-lg hover:bg-gray-100 transition">Cancel</button>
+                <button id="crop-save" class="monochrome-button text-white px-5 py-2 rounded-lg font-medium">Crop & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cropper;
+        const sizeOptions = ['S', 'M', 'L', 'XL', 'XXL'];
+        let usedSizes = [];
+        let imageCount = 0;
+        let croppedImages = [];
+        let isSubmitting = false;
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), wait);
+            };
+        }
+
+        document.getElementById('image-upload').addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) {
+                        alert('Only image files are allowed');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = document.getElementById('image-to-crop');
+                        img.src = event.target.result;
+                        document.getElementById('crop-modal').classList.remove('hidden');
+                        if (cropper) cropper.destroy();
+                        setTimeout(() => {
+                            cropper = new Cropper(img, {
+                                aspectRatio: 1,
+                                viewMode: 1,
+                                background: false,
+                                responsive: true,
+                                autoCropArea: 0.8,
+                            });
+                        }, 100);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+
+        document.getElementById('close-crop').addEventListener('click', closeCropModal);
+        document.getElementById('crop-cancel').addEventListener('click', closeCropModal);
+
+        function closeCropModal() {
+            document.getElementById('crop-modal').classList.add('hidden');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
+        document.getElementById('crop-save').addEventListener('click', () => {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({ width: 300, height: 300, imageSmoothingQuality: 'medium' });
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    addImageToPreview(url, blob);
+                    croppedImages.push(blob);
+                    closeCropModal();
+                }, 'image/jpeg', 0.8);
+            }
+        });
+
+        function addImageToPreview(url, blob) {
+            const preview = document.getElementById('image-preview');
+            const imgId = `image-${imageCount++}`;
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'image-card relative rounded-lg overflow-hidden bg-white';
+            imgDiv.innerHTML = `
+                <img src="${url}" class="w-full h-32 object-cover">
+                <div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-white bg-opacity-50 transition-opacity">
+                    <button type="button" class="delete-button p-2 rounded-full" onclick="removeImage(this, '${imgId}')">
+                        <svg class="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+            `;
+            preview.appendChild(imgDiv);
+        }
+
+        function removeImage(button, imgId) {
+            const index = parseInt(imgId.split('-')[1]);
+            croppedImages[index] = null;
+            button.closest('.image-card').remove();
+        }
+
+        const form = document.getElementById('product-form');
+        const submitButton = document.getElementById('add-product');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            console.log('Form submission intercepted');
+            handleSubmit();
+        });
+
+        const handleSubmit = debounce(function () {
+    if (isSubmitting) {
+        console.log('Already submitting, ignoring');
+        return;
+    }
+
+    const productName = document.getElementById('productName').value.trim();
+    if (!productName) {
+        alert('Please enter a product name');
+        return;
+    }
+    if (productName.length <= 5) {
+        alert('Product name must be more than 5 characters');
+        return;
+    }
+
+    const description = document.getElementById('description').value.trim();
+    if (!description) {
+        alert('Please enter a description');
+        return;
+    }
+
+    const brand = document.getElementById('brand').value.trim();
+    if (!brand) {
+        alert('Please enter a brand');
+        return;
+    }
+
+    const category = document.getElementById('category').value;
+    if (!category) {
+        alert('Please select a category');
+        return;
+    }
+
+    const variants = document.querySelectorAll('.variant-card');
+    if (variants.length === 0) {
+        alert('Please add at least one size variant');
+        return;
+    }
+
+    let isVariantsValid = true;
+    const sizes = new Set();
+    variants.forEach(variant => {
+        const size = variant.querySelector('.size-select').value;
+        const stock = variant.querySelector('.stock-input').value;
+        const actualPrice = variant.querySelector('.actual-price-input').value;
+        if (!size || !stock || !actualPrice || parseFloat(stock) < 0 || parseFloat(actualPrice) <= 0) {
+            isVariantsValid = false;
+        }
+        if (size) sizes.add(size);
+    });
+    if (!isVariantsValid) {
+        alert('Please complete all variant information with valid values (size, stock >= 0, price > 0)');
+        return;
+    }
+    if (sizes.size !== variants.length) {
+        alert('Duplicate sizes are not allowed');
+        return;
+    }
+
+    const validImages = croppedImages.filter(blob => blob !== null);
+    if (validImages.length < 3) {
+        alert('Please upload at least 3 images');
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'Submitting...';
+    isSubmitting = true;
+
+    const formData = new FormData();
+    formData.append('product_name', productName);
+    formData.append('description', description);
+    formData.append('brand', brand);
+    formData.append('category_id', category);
+
+    variants.forEach(variant => {
+        formData.append('size[]', variant.querySelector('.size-select').value);
+        formData.append('stock[]', variant.querySelector('.stock-input').value);
+        formData.append('actual_price[]', variant.querySelector('.actual-price-input').value);
+    });
+
+    validImages.forEach((blob, index) => {
+        formData.append('images[]', blob, `product_image_${index}.jpg`);
+    });
+
+    fetch('/admin/products/add', {
+        method: 'POST',
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+    }).then(response => {
+        if (response.ok) {
+            window.location.href = '/admin/products?message=Product added successfully';
+        } else {
+            return response.text().then(text => { throw new Error('Error: ' + text); });
+        }
+    }).catch(error => {
+        alert(error.message);
+        submitButton.disabled = false;
+        submitButton.textContent = 'ADD PRODUCT';
+        isSubmitting = false;
+    });
+}, 500);
+
+        document.getElementById('add-variant').addEventListener('click', addVariant);
+        addVariant();
+
+        function addVariant() {
+            const container = document.getElementById('variants-container');
+            const availableSizes = sizeOptions.filter(size => !usedSizes.includes(size));
+            if (availableSizes.length === 0) {
+                alert('All sizes have been used. Remove a variant to add a new one.');
+                return;
+            }
+
+            const variantId = `variant-${Date.now()}`;
+            const variantDiv = document.createElement('div');
+            variantDiv.className = 'variant-card bg-white rounded-lg p-4';
+            variantDiv.dataset.variantId = variantId;
+
+            const sizeOptionsHtml = sizeOptions.map(size => {
+                const isDisabled = usedSizes.includes(size);
+                return `<option value="${size}" ${isDisabled ? 'disabled' : ''}>${size}</option>`;
+            }).join('');
+
+            variantDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-black font-medium">Size Variant</h3>
+                    <button type="button" class="text-black hover:text-gray-700" onclick="removeVariant('${variantId}')">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-black">Size</label>
+                        <select class="size-select w-full bg-white monochrome-input rounded-lg p-3 pr-10 focus:outline-none text-black" 
+                                data-variant-id="${variantId}" required>
+                            <option value="" disabled selected>Select size</option>
+                            ${sizeOptionsHtml}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-black">Stock</label>
+                        <input type="number" class="stock-input w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black" 
+                               placeholder="Enter stock count" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-black">Actual Price</label>
+                        <input type="number" class="actual-price-input w-full bg-white monochrome-input rounded-lg p-3 focus:outline-none text-black" 
+                               placeholder="Enter actual price" step="0.01" min="0" required>
+                    </div>
+                </div>
+            `;
+            container.appendChild(variantDiv);
+            const sizeSelect = variantDiv.querySelector('.size-select');
+            sizeSelect.addEventListener('change', handleSizeChange);
+        }
+
+        function handleSizeChange(e) {
+            const selectedSize = e.target.value;
+            const variantId = e.target.dataset.variantId;
+            usedSizes = usedSizes.filter(id => id !== variantId);
+            if (selectedSize) usedSizes.push(selectedSize);
+            updateSizeDropdowns();
+        }
+
+        function updateSizeDropdowns() {
+            const sizeSelects = document.querySelectorAll('.size-select');
+            sizeSelects.forEach(select => {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="" disabled selected>Select size</option>';
+                sizeOptions.forEach(size => {
+                    const isUsed = usedSizes.includes(size);
+                    const option = document.createElement('option');
+                    option.value = size;
+                    option.text = size;
+                    option.disabled = isUsed && size !== currentValue;
+                    select.appendChild(option);
+                });
+                select.value = currentValue || '';
+            });
+        }
+
+        function removeVariant(variantId) {
+            const variantDiv = document.querySelector(`[data-variant-id="${variantId}"]`);
+            if (variantDiv) {
+                const size = variantDiv.querySelector('.size-select').value;
+                usedSizes = usedSizes.filter(s => s !== size);
+                variantDiv.remove();
+                updateSizeDropdowns();
+            }
+        }
+
+        const dropZone = document.querySelector('.border-dashed');
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('border-black');
+        });
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('border-black');
+        });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('border-black');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (!file.type.startsWith('image/')) {
+                        alert('Only image files are allowed');
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = document.getElementById('image-to-crop');
+                        img.src = event.target.result;
+                        document.getElementById('crop-modal').classList.remove('hidden');
+                        if (cropper) cropper.destroy();
+                        setTimeout(() => {
+                            cropper = new Cropper(img, {
+                                aspectRatio: 1,
+                                viewMode: 1,
+                                background: false,
+                                responsive: true,
+                                autoCropArea: 0.8,
+                            });
+                        }, 100);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        });
+        dropZone.addEventListener('click', () => {
+            document.getElementById('image-upload').click();
+        });
+
+        console.log('Add Product script loaded');
+    </script>
+</body>
+</html>

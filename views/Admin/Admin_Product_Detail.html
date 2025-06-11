@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Product Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        /* Existing styles remain unchanged */
+        .premium-card { background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); padding: 24px; }
+        .image-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+        .product-image { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .product-image:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15); }
+        .detail-label { font-weight: 600; color: #2c3e50; text-transform: uppercase; letter-spacing: 0.5px; }
+        .detail-value { color: #34495e; margin-bottom: 16px; }
+        .variant-card, .offer-card { background: white; border-radius: 10px; padding: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; justify-content: space-between; align-items: center; }
+        .variant-card:hover, .offer-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1); }
+        .variant-info, .offer-info { display: flex; flex-direction: column; gap: 4px; }
+        .variant-info span, .offer-info span { font-size: 0.9rem; }
+        .status-btn { padding: 8px 16px; border-radius: 6px; font-weight: 600; transition: all 0.3s ease; cursor: pointer; border: none; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); filter: brightness(110%); }
+        .status-unblocked { background: linear-gradient(45deg, #147ad6, #3498db); color: white; }
+        .status-blocked { background: linear-gradient(45deg, #d85c38, #e74c3c); color: white; }
+        .price-tag { background: #2ecc71; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; display: inline-block; }
+        .actual-price-tag { background: #3498db; color: white; padding: 4px 12px; border-radius: 20px; font-weight: 600; display: inline-block; }
+        .stock-low { color: #e74c3c; font-weight: 600; }
+        .stock-available { color: #2ecc71; font-weight: 600; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 40; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border-radius: 10px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2); z-index: 50; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-open { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .premium-card { animation: fadeIn 0.5s ease forwards; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="/views/Admin/images/Logo.svg" alt="VogueLuxe Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Product Details</h1>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin/products" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-200">Back to Products</a>
+                    <img src="/views/Admin/images/pexels-christina-morillo-1181690 1.jpg" alt="User Profile" class="rounded-full h-10 w-10">
+                </div>
+            </header>
+
+            <!-- Product Details Section -->
+            <section class="premium-card">
+                <div class="flex flex-col md:flex-row gap-8">
+                    <!-- Product Images Gallery -->
+                    <div class="md:w-1/3">
+                        {{if .Product.Images}}
+                        {{if gt (len .Product.Images) 0}}
+                        <div class="image-gallery">
+                            {{range .Product.Images}}
+                            <img src="{{.ImageURL}}" alt="{{$.Product.ProductName}}" class="product-image">
+                            {{end}}
+                        </div>
+                        {{else}}
+                        <img src="https://via.placeholder.com/400x400" alt="No Image Available" class="product-image">
+                        {{end}}
+                        {{else}}
+                        <img src="https://via.placeholder.com/400x400" alt="No Image Available" class="product-image">
+                        {{end}}
+                    </div>
+
+                    <div class="md:w-2/3">
+                        <h2 class="text-2xl font-semibold text-gray-800 mb-4">{{if .Product.ProductName}}{{.Product.ProductName}}{{else}}Unnamed Product{{end}}</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><p class="detail-label">Brand</p><p class="detail-value">{{if .Product.Brand}}{{.Product.Brand}}{{else}}N/A{{end}}</p></div>
+                            <div><p class="detail-label">Category</p><p class="detail-value">{{if .Product.Category.CategoryName}}{{.Product.Category.CategoryName}}{{else}}N/A{{end}}</p></div>
+                            <div>
+                                <p class="detail-label">Prices</p>
+                                <p class="detail-value">
+                                    {{if .Product.Variants}}
+                                    {{if gt (len .Product.Variants) 0}}
+                                    {{with index .Product.Variants 0}}
+                                    <span class="actual-price-tag">₹{{printf "%.2f" .ActualPrice}}</span>
+                                    {{if ne .SellingPrice .ActualPrice}}
+                                    <span class="price-tag ml-2">₹{{printf "%.2f" .SellingPrice}}</span>
+                                    {{else}}
+                                    <span class="price-tag ml-2">₹{{printf "%.2f" .ActualPrice}}</span>
+                                    {{end}}
+                                    {{end}}
+                                    {{else}}
+                                    <span>N/A</span>
+                                    {{end}}
+                                    {{else}}
+                                    <span>N/A</span>
+                                    {{end}}
+                                </p>
+                            </div>
+                            <div>
+                                <p class="detail-label">Total Stock</p>
+                                <p class="detail-value">
+                                    {{if gt .Product.TotalStock 0}}
+                                    {{if lt .Product.TotalStock 10}}
+                                    <span class="stock-low">{{.Product.TotalStock}}</span>
+                                    {{else}}
+                                    <span class="stock-available">{{.Product.TotalStock}}</span>
+                                    {{end}}
+                                    {{else}}
+                                    <span>N/A</span>
+                                    {{end}}
+                                </p>
+                            </div>
+                            <div><p class="detail-label">Status</p><p class="detail-value">{{if .Product.IsActive}}Listed{{else}}Unlisted{{end}}</p></div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="detail-label">Description</p>
+                            <p class="detail-value">{{if .Product.Description}}{{.Product.Description}}{{else}}No description available{{end}}</p>
+                        </div>
+
+                        <!-- Variants Section -->
+                        <div class="mt-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Variants</h3>
+                            <div class="space-y-4">
+                                {{if .Product.Variants}}
+                                {{range .Product.Variants}}
+                                <div class="variant-card">
+                                    <div class="variant-info">
+                                        <span class="font-semibold text-gray-700">{{.Size}}</span>
+                                        <span>Stock: {{if lt .StockCount 10}}<span class="stock-low">{{.StockCount}}</span>{{else}}<span class="stock-available">{{.StockCount}}</span>{{end}}</span>
+                                        <span>Actual Price: <span class="actual-price-tag">₹{{printf "%.2f" .ActualPrice}}</span></span>
+                                        <span>Selling Price: {{if ne .SellingPrice .ActualPrice}}<span class="price-tag">₹{{printf "%.2f" .SellingPrice}}</span>{{else}}<span class="price-tag">₹{{printf "%.2f" .ActualPrice}}</span>{{end}}</span>
+                                        <span>Status: {{if .IsActive}}Listed{{else}}Unlisted{{end}}</span>
+                                    </div>
+                                    <button class="status-btn {{if .IsActive}}status-blocked{{else}}status-unblocked{{end}} toggle-variant-status" data-variant-id="{{.ID}}" data-is-active="{{.IsActive}}" {{if not $.Product.IsActive}}disabled{{end}}>
+                                        {{if .IsActive}}Unlist{{else}}List{{end}}
+                                    </button>
+                                </div>
+                                {{end}}
+                                {{else}}
+                                <p class="text-gray-500">No variants available</p>
+                                {{end}}
+                            </div>
+                        </div>
+
+                        <!-- Offers Section -->
+                        <div class="mt-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Offers</h3>
+                            {{if .NoProductOffer}}
+                            <button id="add-offer-btn" class="status-btn status-unblocked mb-4">Add Product Offer</button>
+                            {{end}}
+                            <div id="offers-container" class="space-y-4">
+                                <!-- Product Offer (only one allowed) -->
+                                {{if .Product.ProductOffers}}
+                                {{with index .Product.ProductOffers 0}}
+                                <div class="offer-card">
+                                    <div class="offer-info">
+                                        <span class="font-semibold text-gray-700">{{.OfferName}}</span>
+                                        <span>Details: {{if .OfferDetails}}{{.OfferDetails}}{{else}}N/A{{end}}</span>
+                                        <span>Percentage: {{printf "%.2f" .OfferPercentage}}%</span>
+                                        <span>Start Date: {{.StartDate.Format "2006-01-02"}}</span>
+                                        <span>End Date: {{.EndDate.Format "2006-01-02"}}</span>
+                                        <span>Status: {{.Status}}</span>
+                                    </div>
+                                    <button class="status-btn status-unblocked edit-offer-btn" data-offer-id="{{.ID}}">Edit</button>
+                                </div>
+                                {{end}}
+                                {{else}}
+                                <p class="text-gray-500">No product offer available</p>
+                                {{end}}
+                                <!-- Category Offers -->
+                                {{if .Product.CategoryOffers}}
+                                <h4 class="text-lg font-semibold text-gray-700 mt-4">Category Offers</h4>
+                                {{range .Product.CategoryOffers}}
+                                <div class="offer-card">
+                                    <div class="offer-info">
+                                        <span class="font-semibold text-gray-700">{{.CategoryOfferName}}</span>
+                                        <span>Details: {{if .OfferDescription}}{{.OfferDescription}}{{else}}N/A{{end}}</span>
+                                        <span>Percentage: {{printf "%.2f" .CategoryOfferPercentage}}%</span>
+                                        <span>Start Date: {{.StartDate.Format "2006-01-02"}}</span>
+                                        <span>End Date: {{.EndDate.Format "2006-01-02"}}</span>
+                                        <span>Status: {{.OfferStatus}}</span>
+                                    </div>
+                                </div>
+                                {{end}}
+                                {{else}}
+                                <p class="text-gray-500 mt-2">No category offers available</p>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Offer Modal -->
+    <div class="modal-overlay" id="offer-modal-overlay"></div>
+    <div class="modal" id="offer-modal">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modal-offer-title">Add Product Offer</h3>
+                <button class="text-gray-500 hover:text-gray-700 text-2xl close-offer-modal">×</button>
+            </div>
+            <form id="offer-form">
+                <div class="grid grid-cols-1 gap-4">
+                    <div><label class="block text-sm font-medium mb-2">Offer Name</label><input type="text" id="offer-name" name="offer_name" class="w-full border rounded-lg p-3" required></div>
+                    <div><label class="block text-sm font-medium mb-2">Offer Details</label><input type="text" id="offer-details" name="offer_details" class="w-full border rounded-lg p-3"></div>
+                    <div><label class="block text-sm font-medium mb-2">Offer Percentage</label><input type="number" id="offer-percentage" name="offer_percentage" class="w-full border rounded-lg p-3" step="0.01" min="0" max="100" required></div>
+                    <div><label class="block text-sm font-medium mb-2">Start Date</label><input type="date" id="start-date" name="start_date" class="w-full border rounded-lg p-3" required></div>
+                    <div><label class="block text-sm font-medium mb-2">End Date</label><input type="date" id="end-date" name="end_date" class="w-full border rounded-lg p-3" required></div>
+                </div>
+                <div class="flex justify-end mt-6 space-x-4">
+                    <button type="button" class="bg-gray-200 text-black px-5 py-2 rounded-lg close-offer-modal">Cancel</button>
+                    <button type="submit" id="save-offer-btn" class="status-btn status-unblocked">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Variant Toggle Logic (unchanged)
+            document.querySelectorAll(".toggle-variant-status").forEach(button => {
+                button.addEventListener("click", function () {
+                    const variantId = this.getAttribute("data-variant-id");
+                    const isActive = this.getAttribute("data-is-active") === "true";
+                    const statusSpan = this.closest(".variant-card").querySelector(".variant-info span:nth-child(5)");
+
+                    fetch(`/admin/variants/toggle-status/${variantId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ isActive: !isActive })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (isActive) {
+                                    this.textContent = "List";
+                                    this.classList.remove("status-blocked");
+                                    this.classList.add("status-unblocked");
+                                    statusSpan.textContent = "Status: Unlisted";
+                                    this.setAttribute("data-is-active", "false");
+                                } else {
+                                    this.textContent = "Unlist";
+                                    this.classList.add("status-blocked");
+                                    this.classList.remove("status-unblocked");
+                                    statusSpan.textContent = "Status: Listed";
+                                    this.setAttribute("data-is-active", "true");
+                                }
+                            } else {
+                                alert("Failed to update variant status: " + (data.error || "Unknown error"));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert("An error occurred while updating variant status");
+                        });
+                });
+            });
+
+            // Offer Modal Logic
+            const modal = document.getElementById('offer-modal');
+            const overlay = document.getElementById('offer-modal-overlay');
+            const addOfferBtn = document.getElementById('add-offer-btn');
+            const closeModalButtons = document.querySelectorAll('.close-offer-modal');
+            const offerForm = document.getElementById('offer-form');
+            let editingOfferId = null;
+
+            // Open Add Offer Modal
+            if (addOfferBtn) {
+                addOfferBtn.addEventListener('click', () => {
+                    document.getElementById('modal-offer-title').textContent = 'Add Product Offer';
+                    offerForm.reset();
+                    editingOfferId = null;
+                    modal.classList.add('modal-open');
+                    overlay.classList.add('modal-open');
+                });
+            }
+
+            // Open Edit Offer Modal
+            document.querySelectorAll('.edit-offer-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    editingOfferId = this.getAttribute('data-offer-id');
+                    document.getElementById('modal-offer-title').textContent = 'Edit Product Offer';
+
+                    fetch(`/admin/offers/${editingOfferId}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success && data.offer) {
+                                const offer = data.offer;
+                                document.getElementById('offer-name').value = offer.offer_name;
+                                document.getElementById('offer-details').value = offer.offer_details || '';
+                                document.getElementById('offer-percentage').value = offer.offer_percentage;
+                                document.getElementById('start-date').value = offer.start_date.split('T')[0];
+                                document.getElementById('end-date').value = offer.end_date.split('T')[0];
+                                modal.classList.add('modal-open');
+                                overlay.classList.add('modal-open');
+                            } else {
+                                throw new Error(data.error || 'No offer data returned');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching offer details:', error);
+                            alert('Failed to load offer details: ' + error.message);
+                        });
+                });
+            });
+
+            // Close Modal
+            closeModalButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    modal.classList.remove('modal-open');
+                    overlay.classList.remove('modal-open');
+                });
+            });
+
+            overlay.addEventListener('click', () => {
+                modal.classList.remove('modal-open');
+                overlay.classList.remove('modal-open');
+            });
+
+            // Form Validation
+            function validateForm() {
+                const offerName = document.getElementById("offer-name").value.trim();
+                const offerPercentage = parseFloat(document.getElementById("offer-percentage").value);
+                const startDate = document.getElementById("start-date").value;
+                const endDate = document.getElementById("end-date").value;
+
+                if (!offerName) { alert("Offer name is required"); return false; }
+                if (isNaN(offerPercentage) || offerPercentage <= 0 || offerPercentage > 100) { alert("Offer percentage must be between 0 and 100"); return false; }
+                if (!startDate || !endDate) { alert("Start and end dates are required"); return false; }
+                if (new Date(startDate) > new Date(endDate)) { alert("End date must be after start date"); return false; }
+                return true;
+            }
+
+            // Form Submission
+            offerForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+
+                if (!validateForm()) return;
+
+                const productId = {{.Product.ID}};
+                const url = editingOfferId ? `/admin/offers/edit/${editingOfferId}` : '/admin/offers/add';
+                const method = editingOfferId ? 'PUT' : 'POST';
+
+                const data = {
+                    offer_name: document.getElementById("offer-name").value,
+                    offer_details: document.getElementById("offer-details").value,
+                    offer_percentage: parseFloat(document.getElementById("offer-percentage").value),
+                    start_date: document.getElementById("start-date").value,
+                    end_date: document.getElementById("end-date").value,
+                    product_id: productId,
+                    status: editingOfferId ? undefined : 'Active'
+                };
+
+                fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert(data.error || "Failed to save offer");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("An error occurred while saving the offer: " + error.message);
+                    });
+            });
+        });
+    </script>
+</body>
+</html>

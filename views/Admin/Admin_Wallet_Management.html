@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe Wallet Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .btn {
+            transition: all 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        .table-header {
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar (Reused from Admin_Dashboard.html) -->
+        <aside class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png"
+                    alt="VogueLuxe Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <a href="/admin/wallet"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💳</span> Wallet
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition duration-200">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Wallet Management</h1>
+            </header>
+
+            <!-- Transactions Table -->
+            <section class="card p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Transaction List</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="table-header">
+                            <tr>
+                                <th class="py-3 px-4 font-medium">Transaction ID</th>
+                                <th class="py-3 px-4 font-medium">Date</th>
+                                <th class="py-3 px-4 font-medium">User</th>
+                                <th class="py-3 px-4 font-medium">Type</th>
+                                <th class="py-3 px-4 font-medium">Amount (₹)</th>
+                                <th class="py-3 px-4 font-medium">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Transactions}}
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-4 px-4">{{.TransactionUID}}</td>
+                                <td class="py-4 px-4 text-gray-600">{{.TransactionDate.Format "2006-01-02 15:04"}}</td>
+                                <td class="py-4 px-4 text-gray-600">{{.UserName}}</td>
+                                <td class="py-4 px-4 text-gray-600">{{.TransactionType}}</td>
+                                <td class="py-4 px-4 text-gray-800">₹{{printf "%.2f" .Amount}}</td>
+                                <td class="py-4 px-4">
+                                    <a href="/admin/transaction/{{.TransactionUID}}"
+                                        class="btn bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">View Details</a>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

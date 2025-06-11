@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: 'Playfair Display', serif;
+            background: linear-gradient(135deg, #f7f4ed 0%, #ffffff 100%);
+            color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .payment-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(229, 229, 229, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .payment-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            position: relative;
+            letter-spacing: 0.05em;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 70px;
+            height: 3px;
+            background: linear-gradient(to right, #d4af37, #b89778);
+        }
+
+        .info-box {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #faf9f5;
+            border-radius: 12px;
+            border: 1px solid rgba(229, 229, 229, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .info-box:hover {
+            background: #f5f2eb;
+            transform: translateY(-2px);
+        }
+
+        .info-box h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #1a1a1a;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+        }
+
+        .info-box p {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            color: #4a4a4a;
+            margin: 0.5rem 0;
+        }
+
+        .delivery-date {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            color: #1a1a1a;
+            font-weight: 500;
+            margin: 1.5rem 0;
+        }
+
+        .delivery-date span {
+            color: #2ecc71;
+            font-weight: 600;
+            background: rgba(46, 204, 113, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+        }
+
+        .payment-methods {
+            background: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%);
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .payment-methods:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .payment-methods h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            letter-spacing: 0.05em;
+        }
+
+        .payment-option {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(8px);
+        }
+
+        .payment-option input {
+            margin-right: 1rem;
+            accent-color: #d4af37;
+        }
+
+        .payment-option label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .pay-button {
+            width: 100%;
+            background: linear-gradient(135deg, #d4af37 0%, #b89778 100%);
+            color: #1a1a1a;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .pay-button:hover {
+            background: linear-gradient(135deg, #b89778 0%, #d4af37 100%);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .order-summary {
+            background: linear-gradient(135deg, #2b2b2b 0%, #1a1a1a 100%);
+            color: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 0 12px rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            position: sticky;
+            top: 30px;
+            width: 100%;
+            max-width: 350px;
+            transition: all 0.3s ease;
+        }
+
+        .order-summary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25), inset 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        .order-summary h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(212, 175, 55, 0.4);
+            padding-bottom: 0.5rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed rgba(212, 175, 55, 0.3);
+            color: #d1d1d1;
+        }
+
+        .summary-item span:first-child {
+            color: #b0b0b0;
+            font-weight: 400;
+        }
+
+        .summary-item span:last-child {
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .discount {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .crossed-out {
+            color: #888888;
+            text-decoration: line-through;
+            font-size: 0.8rem;
+            margin-right: 0.2rem;
+        }
+
+        .free {
+            color: #2ecc71;
+            font-weight: 600;
+            font-size: 0.75rem;
+            background: rgba(46, 204, 113, 0.2);
+            padding: 0.15rem 0.4rem;
+            border-radius: 6px;
+        }
+
+        .summary-total {
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-bottom: none;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            color: #ffffff;
+        }
+
+        .summary-total span:first-child {
+            color: #ffffff;
+        }
+
+        .summary-total span:last-child {
+            color: #d4af37;
+            font-weight: 700;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .coupon-section {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(229, 229, 229, 0.3);
+        }
+
+        .coupon-section h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .coupon-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem;
+            margin-bottom: 0.8rem;
+            background: #f5f2eb;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-option:hover {
+            background: #ede9e0;
+            transform: translateY(-2px);
+        }
+
+        .coupon-option input {
+            margin-right: 0.8rem;
+        }
+
+        .coupon-option label {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            color: #1a1a1a;
+            cursor: pointer;
+        }
+
+        .apply-coupon-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #b89778 100%);
+            color: #1a1a1a;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .apply-coupon-btn:hover {
+            background: linear-gradient(135deg, #b89778 0%, #d4af37 100%);
+            transform: translateY(-2px);
+        }
+
+        .coupon-section input[type="radio"] {
+            accent-color: #d4af37;
+        }
+
+        .payment-option.wallet {
+            position: relative;
+            padding-right: 2.5rem;
+        }
+
+        .payment-option.wallet .balance {
+            position: absolute;
+            right: 1rem;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            color: #d4af37;
+            font-weight: 500;
+            background: rgba(212, 175, 55, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+        }
+
+        .payment-option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .payment-option.disabled label {
+            cursor: not-allowed;
+        }
+
+        .coupon-applied {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid #2ecc71;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="payment-section">
+            <h2 class="section-title">Complete Your Payment</h2>
+            <div class="info-box">
+                <h3>Shipping Address</h3>
+                <p>{{.Address.Country}}</p>
+                <p>{{.Address.State}}, {{.Address.City}} {{.Address.Postcode}}</p>
+                <p>{{.Address.AddressLine}}</p>
+            </div>
+            <div class="info-box">
+                <h3>Contact Details</h3>
+                <p>Phone: {{.Address.PhoneNumber}}</p>
+                {{if .Address.Email}}<p>Email: {{.Address.Email}}</p>{{end}}
+            </div>
+            <div class="delivery-date">
+                Expected Delivery: <span>{{.ExpectedDelivery}}</span>
+            </div>
+            <div class="payment-methods">
+                <h3>Select Payment Method</h3>
+                <form id="payment-form" method="POST" action="/checkout/confirm">
+                    <div class="payment-option {{if not .AllowCOD}}disabled{{end}}">
+                        <input type="radio" id="cod" name="payment_method" value="cod" {{if not .AllowCOD}}disabled{{else}}checked{{end}}>
+                        <label for="cod">Cash on Delivery {{if not .AllowCOD}}(Not available for orders above ₹1000){{end}}</label>
+                    </div>
+                    <div class="payment-option">
+                        <input type="radio" id="razorpay" name="payment_method" value="razorpay" {{if not .AllowCOD}}checked{{end}}>
+                        <label for="razorpay">Pay with Razorpay</label>
+                    </div>
+                    <div class="payment-option wallet {{if lt .WalletBalance .Total}}disabled{{end}}">
+                        <input type="radio" id="wallet" name="payment_method" value="wallet" {{if lt .WalletBalance .Total}}disabled{{end}}>
+                        <label for="wallet">Wallet</label>
+                        <span class="balance">₹{{printf "%.2f" .WalletBalance}}</span>
+                    </div>
+                    <input type="hidden" name="address_id" value="{{.Address.ID}}">
+                    <input type="hidden" name="payment_data_token" value="{{.SignedToken}}">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                    <input type="hidden" name="order_id" id="order_id" value="">
+                    <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id" value="">
+                    <input type="hidden" name="razorpay_order_id" id="razorpay_order_id" value="">
+                    <input type="hidden" name="razorpay_signature" id="razorpay_signature" value="">
+                    <input type="hidden" name="error" id="error" value="">
+                    <input type="hidden" name="coupon_id" id="coupon_id" value="">
+                    <button type="button" id="pay-button" class="pay-button">Confirm Payment</button>
+                </form>
+            </div>
+        </div>
+        <div>
+            <div class="coupon-section">
+                <h3>Available Coupons</h3>
+                {{if .Coupons}}
+                {{range $coupon := .Coupons}}
+                <div class="coupon-option">
+                    <input type="radio" name="coupon" id="coupon-{{$coupon.ID}}" value="{{$coupon.ID}}"
+                        data-discount="{{$coupon.Discount}}" data-max-amount="{{$coupon.MaxAmount}}" data-min-amount="{{$coupon.MinAmount}}">
+                    <label for="coupon-{{$coupon.ID}}">{{$coupon.CouponCode}} - {{$coupon.Discount}}% off (Min ₹{{printf "%.2f" $coupon.MinAmount}}, Max ₹{{printf "%.2f" $coupon.MaxAmount}})</label>
+                </div>
+                {{end}}
+                <button type="button" id="apply-coupon-btn" class="apply-coupon-btn">Apply Coupon</button>
+                {{else}}
+                <p class="text-gray-500">No coupons available</p>
+                {{end}}
+            </div>
+
+            <div class="order-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-item">
+                    <span>Subtotal ({{.ItemCount}} items)</span>
+                    <span id="subtotal-amount">₹{{printf "%.2f" .Subtotal}}</span>
+                </div>
+                <div class="summary-item">
+                    <span>Discount</span>
+                    <span class="discount" id="discount-amount">-₹{{printf "%.2f" .Discount}}</span>
+                </div>
+                <div class="summary-item" id="coupon-discount" style="display: none;">
+                    <span>Coupon Discount (<span id="coupon-code"></span>)</span>
+                    <span class="discount" id="coupon-discount-amount">₹0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>Delivery Charge</span>
+                    <span id="delivery-charge">
+                        {{if ge .SubtotalMinusDiscount 1000.0}}
+                        <span class="crossed-out">₹99</span> <span class="free">Free Delivery</span>
+                        {{else}}
+                        ₹99
+                        {{end}}
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span>Tax (3%)</span>
+                    <span id="tax-amount">₹{{printf "%.2f" .Tax}}</span>
+                </div>
+                <div class="summary-item summary-total">
+                    <span>Total</span>
+                    <span id="total-amount">₹{{printf "%.2f" .Total}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        window.razorpayKeyId = "{{.RazorpayKeyID}}";
+        window.csrfToken = "{{.CSRFToken}}";
+
+        const subtotal = parseFloat({{.Subtotal}});
+        const initialDiscount = parseFloat({{.Discount}});
+        const taxRate = 0.03;
+        const freeShippingThreshold = 1000.0;
+        const deliveryCharge = 99.0;
+        const codLimit = 1000.0; // COD limit
+        let couponDiscount = 0;
+        let selectedCouponID = null;
+        let selectedCouponCode = null;
+
+        function updateOrderSummary() {
+            const taxableAmountBeforeCoupon = subtotal - initialDiscount;
+            const maxCouponDiscount = Math.min(couponDiscount, taxableAmountBeforeCoupon);
+            const taxableAmount = taxableAmountBeforeCoupon - maxCouponDiscount;
+            const tax = taxableAmount * taxRate;
+            const delivery = taxableAmount < freeShippingThreshold ? deliveryCharge : 0;
+            const total = Math.max(taxableAmount + tax + delivery, 0);
+
+            document.getElementById('subtotal-amount').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('discount-amount').textContent = `-₹${initialDiscount.toFixed(2)}`;
+            document.getElementById('coupon-discount-amount').textContent = `-₹${maxCouponDiscount.toFixed(2)}`;
+            document.getElementById('tax-amount').textContent = `₹${tax.toFixed(2)}`;
+            document.getElementById('delivery-charge').innerHTML = taxableAmount >= freeShippingThreshold
+                ? '<span class="crossed-out">₹99</span> <span class="free">Free Delivery</span>'
+                : '₹99';
+            document.getElementById('total-amount').textContent = `₹${total.toFixed(2)}`;
+            document.getElementById('coupon-code').textContent = selectedCouponCode || '';
+            document.getElementById('coupon-discount').style.display = maxCouponDiscount > 0 ? 'flex' : 'none';
+
+            window.orderTotal = total;
+
+            // Update COD option based on total
+            const codOption = document.getElementById('cod');
+            const codDiv = codOption.closest('.payment-option');
+            if (total > codLimit) {
+                codOption.disabled = true;
+                codDiv.classList.add('disabled');
+                codDiv.querySelector('label').textContent = 'Cash on Delivery (Not available for orders above ₹1000)';
+                // Select Razorpay if COD was selected
+                if (codOption.checked) {
+                    document.getElementById('razorpay').checked = true;
+                }
+            } else {
+                codOption.disabled = false;
+                codDiv.classList.remove('disabled');
+                codDiv.querySelector('label').textContent = 'Cash on Delivery';
+            }
+
+            // Re-check wallet option based on updated total
+            const walletBalance = parseFloat({{.WalletBalance}});
+            const walletOption = document.getElementById('wallet');
+            const walletDiv = walletOption.closest('.payment-option');
+            if (walletBalance < total) {
+                walletOption.disabled = true;
+                walletDiv.classList.add('disabled');
+            } else {
+                walletOption.disabled = false;
+                walletDiv.classList.remove('disabled');
+            }
+        }
+
+        updateOrderSummary();
+
+        document.getElementById('apply-coupon-btn').addEventListener('click', function () {
+            const selectedCoupon = document.querySelector('input[name="coupon"]:checked');
+            if (!selectedCoupon) {
+                alert("Please select a coupon to apply.");
+                return;
+            }
+
+            selectedCouponID = selectedCoupon.value;
+            const discountPercentage = parseFloat(selectedCoupon.getAttribute('data-discount'));
+            const maxAmount = parseFloat(selectedCoupon.getAttribute('data-max-amount'));
+            const minAmount = parseFloat(selectedCoupon.getAttribute('data-min-amount'));
+
+            if (subtotal < minAmount) {
+                alert(`Order subtotal (₹${subtotal.toFixed(2)}) does not meet the minimum requirement of ₹${minAmount.toFixed(2)} for this coupon.`);
+                return;
+            }
+
+            couponDiscount = (discountPercentage / 100) * subtotal;
+            if (maxAmount > 0 && couponDiscount > maxAmount) {
+                couponDiscount = maxAmount;
+            }
+
+            const label = document.querySelector(`label[for="coupon-${selectedCouponID}"]`).textContent;
+            selectedCouponCode = label.split(' - ')[0];
+            document.getElementById('coupon_id').value = selectedCouponID;
+
+            document.querySelectorAll('.coupon-option').forEach(opt => opt.classList.remove('coupon-applied'));
+            selectedCoupon.closest('.coupon-option').classList.add('coupon-applied');
+
+            updateOrderSummary();
+        });
+
+        document.getElementById('pay-button').addEventListener('click', function (e) {
+            e.preventDefault();
+            const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+            const addressId = document.querySelector('input[name="address_id"]').value;
+            const paymentDataToken = document.querySelector('input[name="payment_data_token"]').value;
+
+            // Client-side validation for COD
+            if (paymentMethod === 'cod' && window.orderTotal > codLimit) {
+                alert("Cash on Delivery is not available for orders above ₹1000.");
+                return;
+            }
+
+            fetch("/create-pre-order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": window.csrfToken,
+                },
+                body: new URLSearchParams({
+                    "address_id": addressId,
+                    "payment_method": paymentMethod,
+                    "payment_data_token": paymentDataToken,
+                    "coupon_id": selectedCouponID || "",
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== "Success") {
+                    alert("Failed to create pre-order: " + (data.error || "Unknown error"));
+                    return;
+                }
+
+                const orderId = data.order_id;
+                if (paymentMethod === 'cod') {
+                    processPayment(orderId, paymentMethod, null);
+                } else if (paymentMethod === 'razorpay') {
+                    const razorpayOrderId = data.razorpay_order_id;
+                    const options = {
+                        key: window.razorpayKeyId,
+                        amount: Math.round(window.orderTotal * 100),
+                        currency: "INR",
+                        order_id: razorpayOrderId,
+                        handler: function (response) {
+                            processPayment(orderId, paymentMethod, {
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_signature: response.razorpay_signature
+                            });
+                        },
+                        prefill: {
+                            name: "{{if .Address.FirstName}}{{.Address.FirstName}} {{.Address.LastName}}{{else}}Customer{{end}}",
+                            email: "{{if .Address.Email}}{{.Address.Email}}{{else}}customer@example.com{{end}}",
+                            contact: "{{.Address.PhoneNumber}}",
+                        },
+                        theme: { color: "#1a1a1a" },
+                        modal: {
+                            ondismiss: function () {
+                                processPayment(orderId, paymentMethod, { error: "Payment cancelled by user" });
+                            }
+                        }
+                    };
+                    const rzp = new Razorpay(options);
+                    rzp.on("payment.failed", function (response) {
+                        processPayment(orderId, paymentMethod, { error: response.error.description });
+                    });
+                    rzp.open();
+                } else if (paymentMethod === 'wallet') {
+                    processPayment(orderId, paymentMethod, null);
+                }
+            })
+            .catch(error => alert("Error creating pre-order: " + error.message));
+        });
+
+        function processPayment(orderId, paymentMethod, paymentDetails) {
+            const formData = new URLSearchParams({
+                order_id: orderId,
+                payment_method: paymentMethod,
+                _csrf: window.csrfToken,
+                coupon_id: selectedCouponID || "",
+            });
+
+            if (paymentDetails) {
+                if (paymentDetails.razorpay_payment_id) {
+                    formData.append("razorpay_payment_id", paymentDetails.razorpay_payment_id);
+                    formData.append("razorpay_order_id", paymentDetails.razorpay_order_id);
+                    formData.append("razorpay_signature", paymentDetails.razorpay_signature);
+                } else if (paymentDetails.error) {
+                    formData.append("error", paymentDetails.error);
+                }
+            }
+
+            fetch("/checkout/confirm", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRF-Token": window.csrfToken
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => window.location.href = data.redirectURL)
+            .catch(error => alert("Error confirming payment: " + error.message));
+        }
+    </script>
+</body>
+
+</html>

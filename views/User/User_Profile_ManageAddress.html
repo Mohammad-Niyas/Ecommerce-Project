@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Address - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #f8f8f8 0%, #ffffff 100%);
+            color: #2d2d2d;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            z-index: 999;
+            padding: 1rem 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .logo-corner img {
+            width: 150px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-corner img:hover {
+            transform: scale(1.05);
+        }
+
+        #categoriesDropdown {
+            z-index: 1000;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 220px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            transform: scaleY(0);
+            transform-origin: top;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 100;
+        }
+
+        .user-dropdown.active {
+            transform: scaleY(1);
+            opacity: 1;
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            color: #2d2d2d;
+            text-decoration: none;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .user-dropdown a:hover {
+            background: #f0f0f0;
+            color: #000000;
+        }
+
+        .settings-container {
+            width: 90%;
+            max-width: 1400px;
+            margin: 50px auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: row;
+            gap: 2.5rem;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+            overflow: hidden;
+        }
+
+        .settings-sidebar {
+            flex: 1;
+            background: linear-gradient(to bottom, #fafafa 0%, #f5f5f5 100%);
+            padding: 2.5rem;
+            border-right: 1px solid #e8e8e8;
+        }
+
+        .profile {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .profile-img {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transition: transform 0.3s ease;
+            border: 2px solid #ffffff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .profile-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .profile h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            letter-spacing: 0.05em;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            padding: 0.9rem 1.2rem;
+            text-decoration: none;
+            color: #4b4b4b;
+            font-size: 1rem;
+            font-weight: 400;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .menu a:hover {
+            background: #e0e0e0;
+            color: #000000;
+            transform: translateX(5px);
+        }
+
+        .menu a.active {
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .menu a i {
+            margin-right: 0.75rem;
+            color: #6b6b6b;
+            transition: color 0.3s ease;
+        }
+
+        .menu a:hover i,
+        .menu a.active i {
+            color: #000000;
+        }
+
+        .menu a.active i {
+            color: #ffffff;
+        }
+
+        .settings-content {
+            flex: 2;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 0.05em;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(to right, #333333, #000000);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .address-container {
+            background: #f9f9f9;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-address-btn {
+            padding: 0.75rem 2rem;
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .add-address-btn:hover {
+            background: linear-gradient(to right, #1a1a1a, #000000);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .address-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .address-table th,
+        .address-table td {
+            padding: 1.25rem;
+            text-align: left;
+            font-size: 0.95rem;
+            color: #2d2d2d;
+        }
+
+        .address-table th {
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            font-weight: 500;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .address-table td {
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+
+        .address-table tr:hover {
+            background: #f1f1f1;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: color 0.3s ease, background 0.3s ease;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .action-btn.edit {
+            color: #007bff;
+        }
+
+        .action-btn.edit:hover {
+            color: #0056b3;
+            background: #e7f3ff;
+        }
+
+        .action-btn.delete {
+            color: #dc3545;
+        }
+
+        .action-btn.delete:hover {
+            color: #a71d2a;
+            background: #ffebee;
+        }
+
+        .action-btn.set-default {
+            color: #28a745;
+        }
+
+        .action-btn.set-default:hover {
+            color: #218838;
+            background: #e6f4ea;
+        }
+
+        .default-tag {
+            color: #28a745;
+            font-weight: 500;
+            background: #e6f4ea;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: slideIn 0.3s ease;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b6b6b;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #333333;
+        }
+
+        .modal h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .modal form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .modal label {
+            font-size: 0.95rem;
+            color: #2d2d2d;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .modal input,
+        .modal select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #2d2d2d;
+            background: #fafafa;
+            transition: border-color 0.3s ease;
+        }
+
+        .modal input:focus,
+        .modal select:focus {
+            border-color: #333333;
+            outline: none;
+            box-shadow: 0 0 5px rgba(51, 51, 51, 0.2);
+        }
+
+        .modal .default-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal .default-checkbox:hover {
+            background-color: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        .modal .default-checkbox input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #4b5563;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal .default-checkbox input[type="checkbox"]:checked {
+            background-color: #4b5563;
+            border-color: #4b5563;
+        }
+
+        .modal .default-checkbox label {
+            font-size: 0.875rem;
+            color: #374151;
+            user-select: none;
+        }
+
+        .modal button[type="submit"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .modal button[type="submit"]:hover {
+            background: linear-gradient(to right, #1a1a1a, #000000);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .empty-address {
+            text-align: center;
+            color: #6b6b6b;
+            font-size: 1.1rem;
+            padding: 2rem;
+        }
+
+        .retry-btn {
+            color: #007bff;
+            text-decoration: underline;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1rem;
+        }
+
+        .retry-btn:hover {
+            color: #0056b3;
+        }
+
+        .cart-badge {
+            background: #e63946;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .settings-container {
+                flex-direction: column;
+                margin: 20px auto;
+                padding: 1rem;
+                width: 95%;
+            }
+
+            .settings-sidebar {
+                border-right: none;
+                border-bottom: 1px solid #e8e8e8;
+            }
+
+            .profile-img {
+                width: 70px;
+                height: 70px;
+            }
+
+            .profile h3 {
+                font-size: 1.6rem;
+            }
+
+            .menu a {
+                padding: 0.6rem 0.9rem;
+                font-size: 0.9rem;
+            }
+
+            .address-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .address-table th,
+            .address-table td {
+                padding: 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .modal form {
+                grid-template-columns: 1fr;
+            }
+
+            .modal button[type="submit"] {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton" class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:outline-none transition-all duration-300" aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown" class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{if .categories}}
+                                {{range .categories}}
+                                <a href="/product?category={{.ID}}" class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                                {{end}}
+                            {{else}}
+                                <p class="px-4 py-3 text-gray-400">No categories available</p>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..." class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none search-input" id="searchInput">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors" onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton" class="text-black hover:text-gray-600 transition-colors focus:outline-none" title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                <a href="/profile" class="flex items-center space-x-2" data-page="profile">
+                                    <i class="fas fa-user-circle text-gray-600"></i>
+                                    <span>User Profile</span>
+                                </a>
+                                <a href="/logout" class="flex items-center space-x-2">
+                                    <i class="fas fa-sign-out-alt text-gray-600"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i class="fas fa-shopping-bag text-xl"></i></a>
+                            <span class="absolute -top-2 -right-2 text-white  flex items-center justify-center"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Settings Section -->
+    <section class="py-12">
+        <div class="settings-container">
+            <div class="settings-sidebar">
+                <div class="profile">
+                    <div class="profile-img">
+                        {{if .userImage}}
+                        <img src="{{.userImage}}" alt="Profile Image">
+                        {{else}}
+                        <div style="width: 100%; height: 100%; border-radius: 50%; background: #ccc;"></div>
+                        {{end}}
+                    </div>
+                    <h3>{{.username}}</h3>
+                </div>
+                <div class="menu">
+                    <a href="/profile" data-page="profile"><i class="fas fa-user"></i> Personal Information</a>
+                    <a href="/orders" data-page="orders"><i class="fas fa-box"></i> My Orders</a>
+                    <a href="/wishlist" data-page="wishlist"><i class="far fa-heart"></i> Wishlist</a>
+                    <a href="/cart" data-page="cart"><i class="fas fa-shopping-cart"></i> Shopping Cart</a>
+                    <a href="/wallet" data-page="wallet"><i class="fas fa-wallet"></i> Wallet</a>
+                    <a href="/address" data-page="addresses" class="active"><i class="fas fa-map-marker-alt"></i> Manage Address</a>
+                    <a href="/settings" data-page="settings"><i class="fas fa-cog"></i> Settings</a>
+                </div>
+            </div>
+            <div class="settings-content">
+                <h2 class="section-title">Manage Addresses</h2>
+                <div class="content-section active" id="address-section">
+                    <div class="address-container">
+                        <button class="add-address-btn">Add New Address</button>
+                        <table class="address-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Address</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="address-list">
+                                {{range .addresses}}
+                                <tr data-id="{{.ID}}" data-email="{{if .Email}}{{.Email}}{{else}}{{end}}" data-landmark="{{.Landmark}}" data-alternate-phone="{{if .AlternatePhone}}{{.AlternatePhone}}{{else}}{{end}}" data-default="{{.DefaultAddress}}">
+                                    <td>{{.FirstName}} {{.LastName}}</td>
+                                    <td>
+                                        {{.AddressLine}}, {{.City}}, {{.State}}, {{.Postcode}}, {{.Country}}
+                                        {{if .DefaultAddress}}
+                                        <span class="default-tag">Default</span>
+                                        {{end}}
+                                    </td>
+                                    <td>{{.PhoneNumber}}</td>
+                                    <td>
+                                        <button class="action-btn edit">Edit</button>
+                                        <button class="action-btn delete">Delete</button>
+                                        {{if not .DefaultAddress}}
+                                        <button class="action-btn set-default">Set as Default</button>
+                                        {{end}}
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Address Modal -->
+    <div class="modal" id="address-modal">
+        <div class="modal-content">
+            <button class="modal-close">×</button>
+            <h3 id="modal-title">Add New Address</h3>
+            <form id="address-form" class="space-y-4" enctype="multipart/form-data">
+                <input type="hidden" id="address-id" name="id">
+                <div>
+                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                    <input type="text" id="first_name" name="first_name" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email (Optional)</label>
+                    <input type="email" id="email" name="email" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" required pattern="[0-9]{10,15}" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                    <select id="country" name="country" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select Country</option>
+                        <option value="USA">USA</option>
+                        <option value="UK">UK</option>
+                        <option value="Canada">Canada</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="postcode" class="block text-sm font-medium text-gray-700">Postcode</label>
+                    <input type="text" id="postcode" name="postcode" required pattern="[0-9]{5,10}" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="state" class="block text-sm font-medium text-gray-700">State</label>
+                    <input type="text" id="state" name="state" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                    <input type="text" id="city" name="city" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                    <input type="text" id="address" name="address" required class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="landmark" class="block text-sm font-medium text-gray-700">Landmark (Optional)</label>
+                    <input type="text" id="landmark" name="landmark" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="alternate_phone" class="block text-sm font-medium text-gray-700">Alternate Phone (Optional)</label>
+                    <input type="tel" id="alternate_phone" name="alternate_phone" pattern="[0-9]{10,15}" class="mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="default-checkbox">
+                    <input type="checkbox" id="default_address" name="default_address" class="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="default_address" class="text-sm font-medium text-gray-700">Set as Default Address</label>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-gray-800 to-black text-white py-2 px-4 rounded-md hover:bg-gradient-to-r hover:from-gray-900 hover:to-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Save Address
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById('categoriesButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('scale-y-100');
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'false' ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('categoriesButton');
+            const dropdown = document.getElementById('categoriesDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('scale-y-100');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('userButton').addEventListener('click', function (e) {
+            e.preventDefault();
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('userButton');
+            const dropdown = document.getElementById('userDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('active');
+            }
+        });
+
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value;
+            window.location.href = `/product?search=${encodeURIComponent(query)}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const addressSection = document.getElementById('address-section');
+            const addressList = document.getElementById('address-list');
+            const modal = document.getElementById('address-modal');
+            const form = document.getElementById('address-form');
+            const modalTitle = document.getElementById('modal-title');
+
+
+            function loadAddresses() {
+                fetch('/address', { credentials: 'include' })
+                    .then(response => {
+                        if (!response.ok) {
+                            if (response.status === 401) window.location.href = '/login';
+                            throw new Error('Failed to load addresses');
+                        }
+                        return response.text();
+                    })
+                    .then(html => {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        addressSection.innerHTML = doc.querySelector('#address-section').innerHTML;
+                        attachEventListeners();
+                        checkEmptyState();
+                    })
+                    .catch(error => {
+                        console.error('Error loading addresses:', error);
+                        addressSection.innerHTML = `
+                            <div class="address-container">
+                                <button class="add-address-btn">Add New Address</button>
+                                <p class="empty-address">Error loading addresses. <button class="retry-btn" onclick="loadAddresses()">Retry</button></p>
+                            </div>
+                        `;
+                        attachEventListeners();
+                    });
+            }
+
+            function attachEventListeners() {
+                const addressContainer = addressSection.querySelector('.address-container');
+                addressContainer.addEventListener('click', function (e) {
+                    const target = e.target;
+                    if (target.classList.contains('add-address-btn')) {
+                        modalTitle.textContent = 'Add New Address';
+                        form.reset();
+                        document.getElementById('address-id').value = '';
+                        modal.classList.add('active');
+                    } else if (target.classList.contains('edit')) {
+                        handleEdit(target);
+                    } else if (target.classList.contains('delete')) {
+                        handleDelete(target);
+                    } else if (target.classList.contains('set-default')) {
+                        handleSetDefault(target);
+                    } else if (target.classList.contains('retry-btn')) {
+                        loadAddresses();
+                    }
+                });
+
+                document.querySelector('.modal-close').addEventListener('click', () => {
+                    modal.classList.remove('active');
+                });
+
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    const isEdit = document.getElementById('address-id').value !== '';
+                    const url = isEdit ? '/update-address' : '/add-address';
+                    const method = 'POST';
+
+                    // Validate required fields
+                    const requiredFields = ['first_name', 'last_name', 'phone_number', 'country', 'postcode', 'state', 'city', 'address'];
+                    for (const field of requiredFields) {
+                        const value = formData.get(field).trim();
+                        if (!value) {
+                            alert(`Please fill in the ${field.replace('_', ' ')} field.`);
+                            return;
+                        }
+                    }
+
+                    // Set Email to null if empty
+                    const email = formData.get('email').trim() || null;
+                    formData.set('email', email);
+
+                    fetch(url, {
+                        method: method,
+                        body: formData,
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Failed to ${isEdit ? 'update' : 'add'} address`);
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(data.message);
+                        modal.classList.remove('active');
+                        form.reset();
+
+                        // Update table with new or updated address
+                        const addressData = data.address || {
+                            ID: data.id || Date.now(),
+                            FirstName: formData.get('first_name'),
+                            LastName: formData.get('last_name'),
+                            Email: email,
+                            PhoneNumber: formData.get('phone_number'),
+                            Country: formData.get('country'),
+                            Postcode: formData.get('postcode'),
+                            State: formData.get('state'),
+                            City: formData.get('city'),
+                            AddressLine: formData.get('address'),
+                            Landmark: formData.get('landmark'),
+                            AlternatePhone: formData.get('alternate_phone') || null,
+                            DefaultAddress: formData.get('default_address') === 'on'
+                        };
+                        if (isEdit) {
+                            const row = addressList.querySelector(`tr[data-id="${addressData.ID}"]`);
+                            if (row) {
+                                row.replaceWith(createAddressRow(addressData));
+                            }
+                        } else {
+                            const newRow = createAddressRow(addressData);
+                            addressList.appendChild(newRow);
+                        }
+                        checkEmptyState();
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                        console.error(`Error ${isEdit ? 'updating' : 'adding'} address:`, error);
+                    });
+                });
+            }
+
+            function checkEmptyState() {
+                const addressList = addressSection.querySelector('#address-list');
+                if (!addressList || addressList.children.length === 0) {
+                    addressSection.querySelector('.address-container').innerHTML = `
+                        <button class="add-address-btn">Add New Address</button>
+                        <p class="empty-address">No addresses added yet. Add one to get started!</p>
+                    `;
+                    attachEventListeners();
+                }
+            }
+
+            function createAddressRow(address) {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-id', address.ID);
+                tr.setAttribute('data-email', address.Email || '');
+                tr.setAttribute('data-landmark', address.Landmark || '');
+                tr.setAttribute('data-alternate-phone', address.AlternatePhone || '');
+                tr.setAttribute('data-default', address.DefaultAddress);
+
+                tr.innerHTML = `
+                    <td>${address.FirstName} ${address.LastName}</td>
+                    <td>
+                        ${address.AddressLine}, ${address.City}, ${address.State}, ${address.Postcode}, ${address.Country}
+                        ${address.DefaultAddress ? '<span class="default-tag">Default</span>' : ''}
+                    </td>
+                    <td>${address.PhoneNumber}</td>
+                    <td>
+                        <button class="action-btn edit">Edit</button>
+                        <button class="action-btn delete">Delete</button>
+                        ${address.DefaultAddress ? '' : '<button class="action-btn set-default">Set as Default</button>'}
+                    </td>
+                `;
+                return tr;
+            }
+
+            function handleEdit(button) {
+                const row = button.closest('tr');
+                const id = row.getAttribute('data-id');
+                const firstName = row.cells[0].textContent.split(' ')[0];
+                const lastName = row.cells[0].textContent.split(' ')[1];
+                const addressParts = row.cells[1].textContent.split(', ');
+                const addressLine = addressParts[0].replace(/<[^>]+>/g, ''); // Remove default tag
+                const city = addressParts[1];
+                const state = addressParts[2];
+                const postcode = addressParts[3];
+                const country = addressParts[4];
+                const phoneNumber = row.cells[2].textContent;
+                const email = row.getAttribute('data-email');
+                const landmark = row.getAttribute('data-landmark');
+                const alternatePhone = row.getAttribute('data-alternate-phone');
+                const defaultAddress = row.getAttribute('data-default') === 'true';
+
+                modalTitle.textContent = 'Edit Address';
+                document.getElementById('address-id').value = id;
+                document.getElementById('first_name').value = firstName;
+                document.getElementById('last_name').value = lastName;
+                document.getElementById('email').value = email || '';
+                document.getElementById('phone_number').value = phoneNumber;
+                document.getElementById('country').value = country;
+                document.getElementById('postcode').value = postcode;
+                document.getElementById('state').value = state;
+                document.getElementById('city').value = city;
+                document.getElementById('address').value = addressLine;
+                document.getElementById('landmark').value = landmark || '';
+                document.getElementById('alternate_phone').value = alternatePhone || '';
+                document.getElementById('default_address').checked = defaultAddress;
+
+                modal.classList.add('active');
+            }
+
+            function handleDelete(button) {
+                if (confirm('Are you sure you want to delete this address?')) {
+                    const row = button.closest('tr');
+                    const id = row.getAttribute('data-id');
+                    fetch('/delete-address', {
+                        method: 'POST',
+                        body: new URLSearchParams({ id }),
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to delete address');
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(data.message);
+                        row.remove();
+                        checkEmptyState();
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                        console.error('Error deleting address:', error);
+                    });
+                }
+            }
+
+            function handleSetDefault(button) {
+                if (confirm('Set this address as the default?')) {
+                    const row = button.closest('tr');
+                    const id = row.getAttribute('data-id');
+                    fetch('/set-default-address', {
+                        method: 'POST',
+                        body: new URLSearchParams({ id }),
+                        credentials: 'include'
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to set default address');
+                        return response.json();
+                    })
+                    .then(data => {
+                        alert(data.message);
+                        loadAddresses(); // Reload to update default status
+                    })
+                    .catch(error => {
+                        alert(error.message);
+                        console.error('Error setting default address:', error);
+                    });
+                }
+            }
+
+            loadAddresses();
+        });
+    </script>
+</body>
+</html>

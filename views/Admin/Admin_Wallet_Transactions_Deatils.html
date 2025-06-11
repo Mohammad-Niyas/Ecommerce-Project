@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe Transaction Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar (Reused from Admin_Dashboard.html) -->
+        <aside class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png"
+                    alt="VogueLuxe Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <a href="/admin/wallet"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💳</span> Wallet
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800 transition duration-200">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 overflow-y-auto">
+            <header class="flex justify-between items-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">Transaction Details</h1>
+            </header>
+
+            <section class="card p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">Transaction Details</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-gray-600">Transaction ID:</p>
+                        <p class="text-gray-800 font-medium">{{.Transaction.TransactionUID}}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Date:</p>
+                        <p class="text-gray-800 font-medium">{{.Transaction.TransactionDate.Format "2006-01-02 15:04"}}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">User Details:</p>
+                        <p class="text-gray-800 font-medium">{{.Transaction.UserDetails.FirstName}} {{.Transaction.UserDetails.LastName}}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Transaction Type:</p>
+                        <p class="text-gray-800 font-medium">{{.Transaction.TransactionType}}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Amount:</p>
+                        <p class="text-gray-800 font-medium">₹{{printf "%.2f" .Transaction.Amount}}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Source:</p>
+                        <p class="text-gray-800 font-medium">{{.Transaction.Source}}</p>
+                    </div>
+                    {{if .Transaction.OrderUID}}
+                    <div>
+                        <p class="text-gray-600">Related Order:</p>
+                        <a href="{{.Transaction.OrderDetailLink}}" class="text-blue-600 hover:underline">View Order #{{.Transaction.OrderUID}}</a>
+                    </div>
+                    {{end}}
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

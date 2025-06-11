@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Coupon Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .error-text { color: #ef4444; font-size: 0.875rem; }
+        .error-border { border-color: #ef4444; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLux Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <a href="/admin/wallet"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💳</span> Wallet
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Coupon Management</h1>
+            </div>
+
+            <!-- Messages -->
+            {{if .Message}}
+            <div class="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">{{.Message}}</div>
+            {{end}}
+            {{if .Error}}
+            <div class="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">{{.Error}}</div>
+            {{end}}
+
+            <!-- Coupon Table -->
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Coupons</h2>
+                    <button id="add-coupon-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                        Add Coupon
+                    </button>
+                </div>
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-gray-500">
+                            <th class="py-2">Coupon Code</th>
+                            <th class="py-2">Discount (%)</th>
+                            <th class="py-2">Used Count</th>
+                            <th class="py-2">Min Amount</th>
+                            <th class="py-2">Max Amount</th>
+                            <th class="py-2">Usage Limit</th>
+                            <th class="py-2">Expiration Date</th>
+                            <th class="py-2">Status</th>
+                            <th class="py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range $coupon := .Coupons}}
+                        <tr class="border-t">
+                            <td class="py-2">{{$coupon.CouponCode}}</td>
+                            <td class="py-2">{{if lt $coupon.Discount 0.0}}0.00{{else}}{{printf "%.2f" $coupon.Discount}}{{end}}</td>
+                            <td class="py-2">{{if lt $coupon.UsedCount 0}}0{{else}}{{$coupon.UsedCount}}{{end}}</td>
+                            <td class="py-2">₹{{if lt $coupon.MinAmount 0.0}}0.00{{else}}{{printf "%.2f" $coupon.MinAmount}}{{end}}</td>
+                            <td class="py-2">₹{{if lt $coupon.MaxAmount 0.0}}0.00{{else}}{{printf "%.2f" $coupon.MaxAmount}}{{end}}</td>
+                            <td class="py-2">{{if lt $coupon.UsageLimit 0}}1{{else}}{{$coupon.UsageLimit}}{{end}}</td>
+                            <td class="py-2">{{if not $coupon.ExpirationDate.IsZero}}{{$coupon.ExpirationDate.Format "02 Jan 2006"}}{{else}}N/A{{end}}</td>
+                            <td class="py-2">
+                                <span class="px-2 py-1 rounded-lg text-white {{if $coupon.IsActive}}bg-green-500{{else}}bg-red-500{{end}}">
+                                    {{if $coupon.IsActive}}Active{{else}}Inactive{{end}}
+                                </span>
+                            </td>
+                            <td class="py-2 flex space-x-2">
+                                <a href="/admin/coupon/edit/{{$coupon.ID}}" class="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600">Edit</a>
+                                <a href="/admin/coupon/toggle/{{$coupon.ID}}" class="bg-{{if $coupon.IsActive}}red{{else}}green{{end}}-500 text-white px-3 py-1 rounded-lg hover:bg-{{if $coupon.IsActive}}red{{else}}green{{end}}-600">
+                                    {{if $coupon.IsActive}}Deactivate{{else}}Activate{{end}}
+                                </a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="9" class="py-2 text-center text-gray-500">No coupons found</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Coupon Popup -->
+            <div id="add-coupon-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+                <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Add New Coupon</h3>
+                        <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <form id="add-coupon-form" action="/admin/coupon/create" method="POST" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Coupon Code</label>
+                            <input type="text" name="coupon_code" class="w-full p-2 border rounded-lg" placeholder="e.g., SAVE10" required>
+                            <div class="error-text" id="coupon_code_error"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Discount (%)</label>
+                            <input type="number" name="discount" step="0.01" min="0" max="100" class="w-full p-2 border rounded-lg" placeholder="e.g., 10.00" required>
+                            <div class="error-text" id="discount_error"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Minimum Amount (₹)</label>
+                            <input type="number" name="min_amount" step="0.01" min="0" class="w-full p-2 border rounded-lg" placeholder="e.g., 500.00" required>
+                            <div class="error-text" id="min_amount_error"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Maximum Amount (₹)</label>
+                            <input type="number" name="max_amount" step="0.01" min="0" class="w-full p-2 border rounded-lg" placeholder="e.g., 1000.00 (optional)">
+                            <div class="error-text" id="max_amount_error"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Usage Limit</label>
+                            <input type="number" name="usage_limit" min="1" class="w-full p-2 border rounded-lg" placeholder="e.g., 100" required>
+                            <div class="error-text" id="usage_limit_error"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Expiration Date</label>
+                            <input type="date" name="expiration_date" class="w-full p-2 border rounded-lg" required>
+                            <div class="error-text" id="expiration_date_error"></div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600">Add Coupon</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('add-coupon-modal');
+        const openModalBtn = document.getElementById('add-coupon-btn');
+        const closeModalBtn = document.getElementById('close-modal');
+        const form = document.getElementById('add-coupon-form');
+
+        openModalBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+        closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+        // Real-time validation
+        const inputs = form.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => validateField(input));
+        });
+
+        function validateField(input) {
+            const name = input.name;
+            const value = input.value.trim();
+            const errorDiv = document.getElementById(`${name}_error`);
+            errorDiv.textContent = '';
+            input.classList.remove('error-border');
+
+            if (!value && input.required) {
+                errorDiv.textContent = `${name.replace('_', ' ').replace(/^\w/, c => c.toUpperCase())} is required`;
+                input.classList.add('error-border');
+                return false;
+            }
+
+            switch (name) {
+                case 'coupon_code':
+                    if (!/^[A-Za-z0-9]{4,50}$/.test(value)) {
+                        errorDiv.textContent = 'Coupon code must be 4-50 alphanumeric characters (no spaces or special characters)';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'discount':
+                    const discount = parseFloat(value);
+                    if (isNaN(discount) || discount <= 0 || discount > 100) {
+                        errorDiv.textContent = 'Discount must be between 0.01 and 100';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'min_amount':
+                    const minAmount = parseFloat(value);
+                    if (isNaN(minAmount) || minAmount < 0) {
+                        errorDiv.textContent = 'Minimum amount must be non-negative';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'max_amount':
+                    const maxAmount = parseFloat(value);
+                    const minAmountInput = form.querySelector('input[name="min_amount"]').value.trim();
+                    const minAmountValue = parseFloat(minAmountInput) || 0;
+                    if (value && (isNaN(maxAmount) || maxAmount < 0 || (maxAmount > 0 && maxAmount < minAmountValue))) {
+                        errorDiv.textContent = 'Maximum amount must be non-negative and >= minimum amount';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'usage_limit':
+                    const usageLimit = parseInt(value);
+                    if (isNaN(usageLimit) || usageLimit <= 0) {
+                        errorDiv.textContent = 'Usage limit must be a positive integer';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+                case 'expiration_date':
+                    const date = new Date(value);
+                    if (isNaN(date.getTime()) || date < new Date()) {
+                        errorDiv.textContent = 'Expiration date must be in the future';
+                        input.classList.add('error-border');
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!validateField(input)) isValid = false;
+            });
+
+            if (isValid) {
+                const formData = new FormData(form);
+                fetch('/admin/coupon/create', {
+                    method: 'POST',
+                    body: formData,
+                }).then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                    } else {
+                        return response.text().then(text => {
+                            throw new Error('Failed to add coupon: ' + text);
+                        });
+                    }
+                }).catch(error => {
+                    alert(error.message);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

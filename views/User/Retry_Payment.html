@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retry Payment - VogueLuxe</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .order-details {
+            margin-bottom: 20px;
+        }
+        .order-details p {
+            margin: 5px 0;
+            color: #555;
+        }
+        .pay-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .pay-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Retry Payment</h2>
+        <div class="order-details">
+            <p><strong>Order ID:</strong> {{.Order.OrderUID}}</p>
+            <p><strong>Total Amount:</strong> ₹{{printf "%.2f" .TotalAmount}}</p>
+        </div>
+        <button class="pay-button" onclick="initiatePayment()">Retry Payment</button>
+    </div>
+
+    <script>
+        function initiatePayment() {
+            var options = {
+                "key": "{{.RazorpayKeyID}}",
+                "amount": {{printf "%.0f" .TotalAmount}} * 100,
+                "currency": "INR",
+                "name": "LuxeCart",
+                "description": "Retry Payment for Order {{.Order.OrderUID}}",
+                "order_id": "{{.RazorpayOrderID}}",
+                "handler": function (response) {
+                    $.ajax({
+                        url: '/order/confirm-retry',
+                        type: 'POST',
+                        data: {
+                            order_id: "{{.Order.OrderUID}}",
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                            _csrf: "{{.CSRFToken}}"
+                        },
+                        success: function (result) {
+                            if (result.redirectURL) {
+                                window.location.href = result.redirectURL;
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("Payment confirmation failed: " + error);
+                        }
+                    });
+                },
+                "prefill": {
+                    "name": "{{.Order.ShippingAddress.FirstName}} {{.Order.ShippingAddress.LastName}}",
+                    "email": "{{.Order.ShippingAddress.Email}}",
+                    "contact": "{{.Order.ShippingAddress.PhoneNumber}}"
+                },
+                "theme": {
+                    "color": "#28a745"
+                }
+            };
+
+            var rzp = new Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                $.ajax({
+                    url: '/order/confirm-retry',
+                    type: 'POST',
+                    data: {
+                        order_id: "{{.Order.OrderUID}}",
+                        error: response.error.description,
+                        _csrf: "{{.CSRFToken}}"
+                    },
+                    success: function (result) {
+                        if (result.redirectURL) {
+                            window.location.href = result.redirectURL;
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error processing payment failure: " + error);
+                    }
+                });
+            });
+            rzp.open();
+        }
+    </script>
+</body>
+</html>

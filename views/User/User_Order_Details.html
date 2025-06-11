@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order #{{.Order.OrderUID}} | LuxeCart</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e5e5;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .header {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .status-tracker {
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding: 2rem 0;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .status-step {
+            text-align: center;
+            flex: 1;
+            max-width: 25%;
+            animation: slideUp 0.5s ease forwards;
+            animation-delay: calc(0.1s * var(--step));
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-step .icon {
+            width: 48px;
+            height: 48px;
+            background: #f5f5f5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            font-size: 1.25rem;
+            color: #666666;
+            transition: all 0.3s ease;
+            border: 2px solid #e5e5e5;
+        }
+
+        .status-step.active .icon {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-step.active p {
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .status-line {
+            position: absolute;
+            top: 24px;
+            left: 12.5%;
+            right: 12.5%;
+            height: 4px;
+            background: #e5e5e5;
+            z-index: 1;
+        }
+
+        .status-progress {
+            position: absolute;
+            top: 24px;
+            left: 12.5%;
+            height: 4px;
+            background: #000000;
+            transition: width 0.5s ease-in-out;
+            z-index: 1;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #000000;
+        }
+
+        .btn-primary:hover {
+            background: #333333;
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 1px solid #000000;
+            color: #000000;
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .btn-retry {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+
+        .btn-retry:hover {
+            background: #218838;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e5e5;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .order-item img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 1.5rem;
+            border: 1px solid #e5e5e5;
+            transition: transform 0.3s ease;
+        }
+
+        .order-item img:hover {
+            transform: scale(1.03);
+        }
+
+        .item-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-price {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .sticky-summary {
+            position: sticky;
+            top: 2rem;
+        }
+
+        .collapsible-header {
+            cursor: pointer;
+            padding: 1rem;
+            background: #f5f5f5;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+
+        .collapsible-header:hover {
+            background: #e5e5e5;
+        }
+
+        .collapsible-header.active i {
+            transform: rotate(180deg);
+        }
+
+        .collapsible-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0;
+        }
+
+        .collapsible-content.active {
+            max-height: 500px;
+            padding: 1rem 0;
+        }
+
+        .text-gray-600 {
+            color: #666666;
+        }
+
+        .text-gray-500 {
+            color: #888888;
+        }
+
+        .text-red-600 {
+            color: #d32f2f;
+        }
+
+        .text-green-600 {
+            color: #388e3c;
+        }
+
+        .text-blue-600 {
+            color: #1976d2;
+        }
+
+        .text-purple-600 {
+            color: #6b46c1;
+        }
+
+        .bg-green-100 {
+            background-color: #e8f5e9;
+        }
+
+        .text-green-800 {
+            color: #2e7d32;
+        }
+
+        .bg-red-100 {
+            background-color: #ffebee;
+        }
+
+        .text-red-800 {
+            color: #c62828;
+        }
+
+        .bg-yellow-100 {
+            background-color: #fff8e1;
+        }
+
+        .text-yellow-800 {
+            color: #f57c00;
+        }
+
+        .bg-gray-100 {
+            background-color: #f5f5f5;
+        }
+
+        .text-gray-800 {
+            color: #374151;
+        }
+
+        @media (max-width: 768px) {
+            .status-tracker {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1rem 0;
+            }
+
+            .status-step {
+                display: flex;
+                align-items: center;
+                text-align: left;
+                gap: 1rem;
+                max-width: 100%;
+            }
+
+            .status-step .icon {
+                margin: 0;
+                flex-shrink: 0;
+            }
+
+            .status-line,
+            .status-progress {
+                display: none;
+            }
+
+            .status-step p {
+                margin: 0;
+            }
+
+            .order-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .order-item img {
+                width: 80px;
+                height: 80px;
+            }
+
+            .item-price {
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="header">Order #{{.Order.OrderUID}}</h1>
+                <p class="text-gray-600">
+                    Placed on {{if not .Order.OrderDate.IsZero}}{{.Order.OrderDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                </p>
+            </div>
+            <a href="/orders" class="btn btn-outline flex items-center space-x-2">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Orders</span>
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Status and Items -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Order Status -->
+                <div class="card">
+                    <h2 class="text-xl font-semibold mb-4">Order Status</h2>
+                    <div class="status-tracker">
+                        <div class="status-line"></div>
+                        <div class="status-progress"
+                            style="width: {{if or (eq .OverallStatus `Cancelled`) (eq .OverallStatus `Failed`)}}0%{{else if eq .OverallStatus `Delivered`}}100%{{else if eq .OverallStatus `OutForDelivery`}}66.67%{{else if eq .OverallStatus `Shipped`}}33.33%{{else}}0%{{end}};">
+                        </div>
+                        <div class="status-step {{if and (ne .OverallStatus `Cancelled`) (ne .OverallStatus `Failed`)}}active{{end}}"
+                            style="--step: 1;">
+                            <div class="icon"><i class="fas fa-check"></i></div>
+                            <p class="text-sm font-medium">Confirmed</p>
+                            <p class="text-xs text-gray-500">
+                                {{if not .Order.OrderDate.IsZero}}{{.Order.OrderDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                            </p>
+                        </div>
+                        <div class="status-step {{if or (eq .OverallStatus `Shipped`) (eq .OverallStatus `OutForDelivery`) (eq .OverallStatus `Delivered`)}}active{{end}}"
+                            style="--step: 2;">
+                            <div class="icon"><i class="fas fa-truck"></i></div>
+                            <p class="text-sm font-medium">Shipped</p>
+                            <p class="text-xs text-gray-500">
+                                {{if not .ShippedDate.IsZero}}{{.ShippedDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                            </p>
+                        </div>
+                        <div class="status-step {{if or (eq .OverallStatus `OutForDelivery`) (eq .OverallStatus `Delivered`)}}active{{end}}"
+                            style="--step: 3;">
+                            <div class="icon"><i class="fas fa-bicycle"></i></div>
+                            <p class="text-sm font-medium">Out for Delivery</p>
+                            <p class="text-xs text-gray-500">
+                                {{if not .OutForDeliveryDate.IsZero}}{{.OutForDeliveryDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                            </p>
+                        </div>
+                        <div class="status-step {{if eq .OverallStatus `Delivered`}}active{{end}}" style="--step: 4;">
+                            <div class="icon"><i class="fas fa-flag-checkered"></i></div>
+                            <p class="text-sm font-medium">Delivered</p>
+                            <p class="text-xs text-gray-500">
+                                {{if not .DeliveryDate.IsZero}}{{.DeliveryDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                        {{if eq .OverallStatus "Cancelled"}}
+                        <span class="text-red-600 font-medium">Order Cancelled</span>
+                        {{else if eq .OverallStatus "Failed"}}
+                        <span class="text-red-600 font-medium">Order Failed</span>
+                        {{else if eq .OverallStatus "Delivered"}}
+                        <span class="text-green-600 font-medium">Order Delivered</span>
+                        {{else if eq .OverallStatus "OutForDelivery"}}
+                        <span class="text-blue-600 font-medium">Out for Delivery</span>
+                        {{else if eq .OverallStatus "Shipped"}}
+                        <span class="text-blue-600 font-medium">Shipped</span>
+                        {{else if eq .OverallStatus "Processing"}}
+                        <span class="text-blue-600 font-medium">Processing</span>
+                        {{else if eq .OverallStatus "Pending"}}
+                        <span class="text-blue-600 font-medium">Pending</span>
+                        {{else}}
+                        <span class="text-gray-600 font-medium">Status: {{.OverallStatus}}</span>
+                        {{end}}
+                        {{if and (not (eq .OverallStatus "Delivered")) (not (eq .OverallStatus "Cancelled")) (not (eq .OverallStatus "Failed"))}}
+                        <button class="btn btn-primary ml-2" onclick="showCancelPopup('{{.Order.OrderUID}}')">Cancel Order</button>
+                        {{end}}
+                        {{if eq .PaymentStatus "Failed"}}
+                        <a href="/order/retry-payment?order_id={{.Order.OrderUID}}" class="btn btn-retry ml-2">Retry Payment</a>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- Order Items -->
+                <div class="card">
+                    <h2 class="text-xl font-semibold mb-4">Items Ordered</h2>
+                    {{if .OrderItems}}
+                    {{range $item := .OrderItems}}
+                    <div class="order-item">
+                        <img src="{{if and $item.OrderItem.Product.Images (gt (len $item.OrderItem.Product.Images) 0)}}{{(index $item.OrderItem.Product.Images 0).ImageURL}}{{else}}/static/images/default.jpg{{end}}"
+                            alt="{{$item.OrderItem.ProductName}}" class="item-image">
+                        <div class="item-details">
+                            <p class="text-lg font-medium">{{$item.OrderItem.ProductName}}</p>
+                            <p class="text-sm text-gray-600">Status: <span
+                                    class="font-semibold {{if eq $item.OrderItem.OrderStatus `Cancelled`}}text-red-600{{else if eq $item.OrderItem.OrderStatus `Delivered`}}text-green-600{{else if eq $item.OrderItem.OrderStatus `Refunded`}}text-purple-600{{else if eq $item.OrderItem.OrderStatus `Failed`}}text-red-600{{else if eq $item.OrderItem.OrderStatus `Shipped`}}text-blue-600{{else if eq $item.OrderItem.OrderStatus `OutForDelivery`}}text-blue-600{{else}}text-blue-600{{end}}">{{$item.OrderItem.OrderStatus}}</span>
+                            </p>
+                            <p class="text-sm text-gray-600">Qty: {{$item.OrderItem.Quantity}} | Size: {{$item.OrderItem.Size}}</p>
+                            <p class="text-sm text-gray-600">
+                                Expected: {{if not $item.OrderItem.ExpectedDeliveryDate.IsZero}}{{$item.OrderItem.ExpectedDeliveryDate.Format "02 Jan 2006"}}{{else}}N/A{{end}}
+                            </p>
+                            {{if eq $item.OrderItem.OrderStatus "Processing"}}
+                            <button class="btn btn-outline text-sm mt-2"
+                                onclick="showItemCancelPopup('{{$.Order.OrderUID}}', '{{$item.OrderItem.ID}}')">Cancel Item</button>
+                            {{else if eq $item.OrderItem.OrderStatus "Delivered"}}
+                            {{if $item.IsReturnEligible}}
+                            <button
+                                class="btn btn-outline text-sm mt-2 bg-blue-50 hover:bg-blue-100 border-blue-500 text-blue-700 flex items-center space-x-2"
+                                onclick="showReturnPopup('{{$.Order.OrderUID}}', '{{$item.OrderItem.ID}}', '{{$item.OrderItem.Total}}')">
+                                <i class="fas fa-undo-alt"></i>
+                                <span>Request Return</span>
+                            </button>
+                            {{else if index $.ReturnRequests $item.OrderItem.ID}}
+                            <p class="text-sm text-gray-600">Return Requested (Status: {{(index $.ReturnRequests $item.OrderItem.ID).Status}})</p>
+                            {{else}}
+                            <p class="text-sm text-gray-600">
+                                {{if $item.OrderItem.DeliveryDate.IsZero}}Delivery date not set{{else}}Return window closed (7 days after delivery){{end}}
+                            </p>
+                            {{end}}
+                            {{end}}
+                        </div>
+                        <p class="item-price">₹{{printf "%.2f" $item.OrderItem.Total}}</p>
+                    </div>
+                    {{end}}
+                    {{else}}
+                    <p class="text-center text-gray-500 py-4">No items in this order</p>
+                    {{end}}
+                </div>
+
+                <!-- Return Popup -->
+                <div id="returnPopup"
+                    class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-lg max-w-md w-full">
+                        <h3 class="text-xl font-semibold mb-4">Request Return</h3>
+                        <form id="returnForm" action="/order/return" method="POST">
+                            <input type="hidden" name="order_id" id="returnOrderId">
+                            <input type="hidden" name="item_id" id="returnItemId">
+                            <input type="hidden" name="amount" id="returnAmount">
+                            <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                            <textarea name="reason" rows="4" class="w-full p-2 border rounded mb-4"
+                                placeholder="Reason for return" required></textarea>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium mb-2">Refund Method</label>
+                                <select name="refund_method" class="w-full p-2 border rounded" required>
+                                    <option value="wallet">Wallet</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full">Submit Return Request</button>
+                        </form>
+                        <button class="mt-2 text-gray-600"
+                            onclick="document.getElementById('returnPopup').classList.add('hidden')">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Summary and Details -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Order Summary (Sticky) -->
+                <div class="card sticky-summary">
+                    <h2 class="text-xl font-semibold mb-4">Order Summary</h2>
+                    <div class="space-y-2">
+                        <p class="flex justify-between"><span>Subtotal</span><span>₹{{printf "%.2f" .Order.SubTotal}}</span></p>
+                        <p class="flex justify-between"><span>Discount</span><span>-₹{{printf "%.2f" .InitialDiscount}}</span></p>
+                        {{if .Coupon.ID}}
+                        <p class="flex justify-between text-green-600"><span>Coupon ({{.Coupon.CouponCode}})</span><span>-₹{{printf "%.2f" .CouponDiscount}}</span></p>
+                        {{end}}
+                        <p class="flex justify-between"><span>Shipping</span><span>₹{{printf "%.2f" .Order.ShippingCharge}}</span></p>
+                        <p class="flex justify-between"><span>Tax</span><span>₹{{printf "%.2f" .Order.Tax}}</span></p>
+                        <p class="flex justify-between text-lg font-semibold mt-2"><span>Total</span><span>₹{{printf "%.2f" .Order.TotalAmount}}</span></p>
+                    </div>
+                    <a href="/order/invoice?order_id={{.Order.OrderUID}}"
+                        class="btn btn-primary w-full mt-4 flex items-center justify-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Download Invoice</span>
+                    </a>
+                </div>
+
+                <!-- Shipping Address (Collapsible) -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)" role="button" aria-expanded="false">
+                        <h2 class="text-lg font-semibold">Shipping Address</h2>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="collapsible-content">
+                        {{if .ShippingAddress.ID}}
+                        <p>{{.ShippingAddress.FirstName}} {{.ShippingAddress.LastName}}</p>
+                        <p>{{.ShippingAddress.AddressLine}}</p>
+                        <p>{{.ShippingAddress.City}}, {{.ShippingAddress.State}} - {{.ShippingAddress.Postcode}}</p>
+                        <p>{{.ShippingAddress.Country}}</p>
+                        <p>Phone: {{.ShippingAddress.PhoneNumber}}</p>
+                        {{if .ShippingAddress.Email}}<p>Email: {{.ShippingAddress.Email}}</p>{{end}}
+                        {{else}}
+                        <p class="text-gray-500">No shipping address available</p>
+                        {{end}}
+                    </div>
+                </div>
+
+                <!-- Payment Info (Collapsible) -->
+                <div class="card">
+                    <div class="collapsible-header" onclick="toggleCollapsible(this)" role="button" aria-expanded="false">
+                        <h2 class="text-lg font-semibold">Payment Info</h2>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="collapsible-content">
+                        {{if .PaymentDetails.ID}}
+                        <p><i class="fas {{if eq .PaymentDetails.PaymentMethod `razorpay`}}fa-credit-card{{else if eq .PaymentDetails.PaymentMethod `cod`}}fa-money-bill{{else}}fa-wallet{{end}} mr-2"></i>{{.PaymentDetails.PaymentMethod}}</p>
+                        <p>Transaction ID: {{if .PaymentDetails.TransactionID}}{{.PaymentDetails.TransactionID}}{{else}}N/A{{end}}</p>
+                        <p>
+                            Processed on: {{if not .PaymentDetails.PaymentDate.IsZero}}{{.PaymentDetails.PaymentDate.Format "02 Jan 2006 15:04"}}{{else}}N/A{{end}}
+                        </p>
+                        <p>Status: <span
+                                class="px-2 py-1 rounded-full text-sm {{if eq .PaymentDetails.PaymentStatus `Completed`}}bg-green-100 text-green-800{{else if eq .PaymentDetails.PaymentStatus `Failed`}}bg-red-100 text-red-800{{else if eq .PaymentDetails.PaymentStatus `Pending`}}bg-yellow-100 text-yellow-800{{else}}bg-gray-100 text-gray-800{{end}}">{{.PaymentDetails.PaymentStatus}}</span>
+                        </p>
+                        {{if eq .PaymentDetails.PaymentStatus "Failed"}}
+                        <a href="/order/retry-payment?order_id={{.Order.OrderUID}}"
+                            class="btn btn-retry mt-2 inline-block">Retry Payment</a>
+                        {{end}}
+                        {{else}}
+                        <p class="text-gray-500">No payment details available</p>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cancel Order Popup -->
+        <div id="cancelPopup" class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg max-w-md w-full">
+                <h3 class="text-xl font-semibold mb-4">Cancel Order</h3>
+                <form id="cancelForm" action="/order/cancel" method="POST">
+                    <input type="hidden" name="order_id" id="cancelOrderId">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                    <textarea name="reason" rows="4" class="w-full p-2 border rounded mb-4"
+                        placeholder="Reason for cancellation" required></textarea>
+                    <button type="submit" class="btn btn-primary w-full">Submit</button>
+                </form>
+                <button class="mt-2 text-gray-600"
+                    onclick="document.getElementById('cancelPopup').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+
+        <!-- Cancel Item Popup -->
+        <div id="itemCancelPopup"
+            class="fixed inset-0 bg-black bg-opacity-75 hidden flex items-center justify-center z-50">
+            <div class="bg-white p-6 rounded-lg max-w-md w-full">
+                <h3 class="text-xl font-semibold mb-4">Cancel Item</h3>
+                <form id="itemCancelForm" action="/order/cancel-item" method="POST">
+                    <input type="hidden" name="order_id" id="itemCancelOrderId">
+                    <input type="hidden" name="item_id" id="itemCancelItemId">
+                    <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
+                    <textarea name="reason" rows="4" class="w-full p-2 border rounded mb-4"
+                        placeholder="Reason for cancellation" required></textarea>
+                    <button type="submit" class="btn btn-primary w-full">Submit</button>
+                </form>
+                <button class="mt-2 text-gray-600"
+                    onclick="document.getElementById('itemCancelPopup').classList.add('hidden')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCancelPopup(orderId) {
+            document.getElementById('cancelOrderId').value = orderId;
+            document.getElementById('cancelPopup').classList.remove('hidden');
+        }
+
+        function showItemCancelPopup(orderId, itemId) {
+            document.getElementById('itemCancelOrderId').value = orderId;
+            document.getElementById('itemCancelItemId').value = itemId;
+            document.getElementById('itemCancelPopup').classList.remove('hidden');
+        }
+
+        function showReturnPopup(orderId, itemId, amount) {
+            document.getElementById('returnOrderId').value = orderId;
+            document.getElementById('returnItemId').value = itemId;
+            document.getElementById('returnAmount').value = amount;
+            document.getElementById('returnPopup').classList.remove('hidden');
+        }
+
+        function toggleCollapsible(element) {
+            const header = element;
+            const content = header.nextElementSibling;
+            const isActive = content.classList.toggle('active');
+            header.classList.toggle('active', isActive);
+            header.setAttribute('aria-expanded', isActive);
+        }
+
+        // Handle form submissions with fetch
+        const forms = [
+            { id: 'cancelForm', action: '/order/cancel', successMsg: 'Order cancelled successfully!' },
+            { id: 'itemCancelForm', action: '/order/cancel-item', successMsg: 'Item cancelled successfully!' },
+            { id: 'returnForm', action: '/order/return', successMsg: 'Return request submitted successfully!' }
+        ];
+
+        forms.forEach(form => {
+            document.getElementById(form.id).addEventListener('submit', function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const reason = formData.get('reason').trim();
+                if (!reason) {
+                    alert('Please provide a reason.');
+                    return;
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-Token': formData.get('_csrf')
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert(form.successMsg);
+                            window.location.reload();
+                        } else {
+                            alert(`Failed: ${data.message || 'Unknown error'}`);
+                        }
+                    })
+                    .catch(error => alert(`Error: ${error.message}`))
+                    .finally(() => this.closest('.fixed').classList.add('hidden'));
+            });
+        });
+    </script>
+</body>
+
+</html>

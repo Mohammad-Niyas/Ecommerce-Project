@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+            color: #000000;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            position: relative;
+        }
+        .success-section {
+            background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+            padding: 5rem 0;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            text-align: center;
+        }
+        .success-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e8e8e8;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            position: relative;
+            animation: fadeIn 1s ease-in-out;
+        }
+        .success-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+            position: relative;
+            animation: slideIn 0.8s ease-out;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(to right, #333333, #000000);
+        }
+        .success-message {
+            font-size: 1.1rem;
+            color: #4a4a4a;
+            margin-bottom: 2rem;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+        .info-box {
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            border: 1px solid #e8e8e8;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1s ease-in-out;
+        }
+        .info-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        .info-box h3 {
+            font-family: 'Lora', serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 0.75rem;
+        }
+        .info-box p {
+            font-size: 0.95rem;
+            color: #4a4a4a;
+            margin: 0.25rem 0;
+            line-height: 1.6;
+        }
+        .highlight {
+            color: #000000;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        .continue-button {
+            display: inline-block;
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(to right, #333333, #000000);
+            color: #ffffff;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-top: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+        .continue-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        .icon-check {
+            font-size: 3rem;
+            color: #000000;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease-in-out;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); }
+            50% { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); }
+            100% { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05); }
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <section class="success-section">
+        <div class="container">
+            <div class="success-card">
+                <i class="fas fa-check-circle icon-check"></i>
+                <h2 class="section-title">Order Placed Successfully!</h2>
+                <p class="success-message">Thank you for your purchase. Your order has been successfully placed with VogueLuxe.</p>
+                
+                <div class="info-box">
+                    <h3>Order Details</h3>
+                    <p>Order ID: <span class="highlight">{{.OrderUID}}</span></p>
+                    <p>Payment Method: {{.PaymentMethod}}</p>
+                    <p>Total Amount: ₹{{printf "%.2f" .TotalAmount}}</p>
+                    <p>Expected Delivery: <span class="highlight">{{.ExpectedDelivery}}</span></p>
+                </div>
+
+                <div class="info-box">
+                    <h3>Shipping Address</h3>
+                    <p>{{.ShippingAddress.FirstName}} {{.ShippingAddress.LastName}}</p>
+                    <p>{{.ShippingAddress.AddressLine}}, {{.ShippingAddress.City}}, {{.ShippingAddress.State}} {{.ShippingAddress.Postcode}}, {{.ShippingAddress.Country}}</p>
+                    {{if .ShippingAddress.Landmark}}<p>Landmark: {{.ShippingAddress.Landmark}}</p>{{end}}
+                </div>
+
+                <div class="info-box">
+                    <h3>Contact Details</h3>
+                    <p>Phone: {{.ShippingAddress.PhoneNumber}}</p>
+                    {{if .ShippingAddress.Email}}<p>Email: {{.ShippingAddress.Email}}</p>{{end}}
+                    {{if .ShippingAddress.AlternatePhone}}<p>Alternate Phone: {{.ShippingAddress.AlternatePhone}}</p>{{end}}
+                </div>
+
+                <a href="/" class="continue-button">Continue Shopping</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Confetti animation on page load
+        window.onload = function() {
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#333333', '#000000', '#4a4a4a', '#ffffff'],
+                shapes: ['circle', 'square', 'triangle'],
+                scalar: 1.2,
+                drift: 0.5,
+            });
+        };
+    </script>
+</body>
+</html>

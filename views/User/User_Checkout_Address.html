@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Address | VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lora:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #1a1a1a;
+            --primary-gold: #d4a373;
+            --secondary-dark: #333333;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            font-family: 'Lora', serif;
+            background: var(--bg-gradient);
+            color: var(--primary-dark);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .checkout-section {
+            padding: 6rem 0;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary-dark);
+            text-align: center;
+            margin-bottom: 4rem;
+            letter-spacing: 0.1em;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-gold), var(--primary-dark));
+        }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 4rem;
+        }
+
+        .address-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .address-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .address-card:hover::before {
+            opacity: 1;
+        }
+
+        .address-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .address-card.selected {
+            border: 2px solid var(--primary-gold);
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95), rgba(245, 245, 245, 0.95));
+        }
+
+        .address-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .address-card p {
+            font-size: 1rem;
+            color: #4a4a4a;
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .default-badge {
+            background: linear-gradient(135deg, var(--primary-gold), #b8860b);
+            color: #fff;
+            padding: 0.4rem 1rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 0.75rem;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto 2.5rem;
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            color: #fff;
+            padding: 1.25rem;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .action-btn:hover::after {
+            width: 200%;
+            height: 200%;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .proceed-btn {
+            display: block;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            background: linear-gradient(to right, var(--primary-gold), #b8860b);
+            color: var(--primary-dark);
+            padding: 1.5rem;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .proceed-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .proceed-btn:hover::after {
+            width: 200%;
+            height: 200%;
+        }
+
+        .proceed-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .proceed-btn:disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            transform: translateY(50px);
+            transition: transform 0.4s ease, opacity 0.4s ease;
+            position: relative;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .modal-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content form {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .modal-content label {
+            font-size: 0.95rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Lora', serif;
+            font-size: 1rem;
+            color: var(--primary-dark);
+            background: #f8f9fa;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .modal-content input:focus,
+        .modal-content select:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 8px rgba(212, 163, 115, 0.3);
+            outline: none;
+        }
+
+        .modal-content input.error {
+            border-color: #e63946;
+        }
+
+        .modal-content .error-message {
+            color: #e63946;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .modal-content button[type="submit"] {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-dark));
+            color: #fff;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .modal-content button[type="submit"]:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content button[type="submit"].loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .modal-content button[type="submit"].loading span {
+            opacity: 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #6b7280;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-dark);
+        }
+
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1.25rem 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .popup.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .popup.success {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: #fff;
+        }
+
+        .popup.error {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+            color: #fff;
+        }
+
+        .popup .popup-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .popup .popup-content i {
+            font-size: 1.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2.5rem;
+            }
+
+            .address-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .address-card {
+                padding: 2rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 1.5rem;
+                max-width: 400px;
+            }
+
+            .modal-content h2 {
+                font-size: 1.75rem;
+            }
+
+            .action-btn,
+            .proceed-btn {
+                font-size: 1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="checkout-section" data-aos="fade-up">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <h1 class="section-title" data-aos="zoom-in">Select Your Delivery Address</h1>
+            <form id="addressForm" method="POST" action="/checkout/address">
+                <div class="address-grid" data-aos="fade-up" data-aos-delay="100">
+                    {{if .Addresses}}
+                        {{range .Addresses}}
+                        <div class="address-card {{if .DefaultAddress}}selected{{end}}" data-address-id="{{.ID}}" data-tilt data-tilt-max="10" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
+                            <input type="radio" name="address_id" id="address_{{.ID}}" value="{{.ID}}" {{if .DefaultAddress}}checked{{end}} style="display:none;" aria-label="Select address for {{.FirstName}} {{.LastName}}">
+                            <h3>{{.FirstName}} {{.LastName}} {{if .DefaultAddress}}<span class="default-badge">Default</span>{{end}}</h3>
+                            <p>{{.AddressLine}}</p>
+                            <p>{{.City}}, {{.State}} {{.Postcode}}</p>
+                            <p>{{.Country}}</p>
+                            <p>Phone: {{.PhoneNumber}}</p>
+                            {{if .AlternatePhone}}<p>Alt. Phone: {{.AlternatePhone}}</p>{{end}}
+                            {{if .Landmark}}<p>Landmark: {{.Landmark}}</p>{{end}}
+                        </div>
+                        {{end}}
+                    {{else}}
+                        <p class="text-center text-gray-700 col-span-full text-lg font-['Lora']" data-aos="fade-in">No addresses found. Please add one to proceed.</p>
+                    {{end}}
+                </div>
+                <button type="button" class="action-btn" id="addAddressBtn" aria-label="Add new address" data-aos="fade-up" data-aos-delay="200">Add New Address</button>
+                <button type="submit" class="proceed-btn" id="proceedBtn" disabled data-aos="fade-up" data-aos-delay="300">Proceed to Payment</button>
+            </form>
+        </div>
+    </section>
+
+    <div class="modal" id="addAddressModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn" aria-label="Close modal">×</button>
+            <h2 data-aos="zoom-in">Add New Address</h2>
+            <form id="addAddressForm" method="POST" action="/add-address" data-aos="fade-up" data-aos-delay="100">
+                <div>
+                    <label for="first_name">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" required aria-required="true">
+                    <span class="error-message" id="first_name_error">First name is required</span>
+                </div>
+                <div>
+                    <label for="last_name">Last Name *</label>
+                    <input type="text" id="last_name" name="last_name" required aria-required="true">
+                    <span class="error-message" id="last_name_error">Last name is required</span>
+                </div>
+                <div>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" aria-describedby="email_error">
+                    <span class="error-message" id="email_error">Valid email is required</span>
+                </div>
+                <div>
+                    <label for="phone_number">Phone Number *</label>
+                    <input type="tel" id="phone_number" name="phone_number" required pattern="[0-9]{10,15}" aria-required="true">
+                    <span class="error-message" id="phone_number_error">Valid 10-15 digit phone number is required</span>
+                </div>
+                <div>
+                    <label for="country">Country *</label>
+                    <select id="country" name="country" required aria-required="true">
+                        <option value="" disabled selected>Select Country</option>
+                        <option value="India">India</option>
+                        <option value="USA">USA</option>
+                        <option value="UK">UK</option>
+                        <option value="Canada">Canada</option>
+                    </select>
+                    <span class="error-message" id="country_error">Country is required</span>
+                </div>
+                <div>
+                    <label for="postcode">Postcode *</label>
+                    <input type="text" id="postcode" name="postcode" required pattern="[0-9]{5,10}" aria-required="true">
+                    <span class="error-message" id="postcode_error">Valid 5-10 digit postcode is required</span>
+                </div>
+                <div>
+                    <label for="state">State *</label>
+                    <input type="text" id="state" name="state" required aria-required="true">
+                    <span class="error-message" id="state_error">State is required</span>
+                </div>
+                <div>
+                    <label for="city">City *</label>
+                    <input type="text" id="city" name="city" required aria-required="true">
+                    <span class="error-message" id="city_error">City is required</span>
+                </div>
+                <div>
+                    <label for="address">Address Line *</label>
+                    <input type="text" id="address" name="address" required aria-required="true">
+                    <span class="error-message" id="address_error">Address is required</span>
+                </div>
+                <div>
+                    <label for="landmark">Landmark</label>
+                    <input type="text" id="landmark" name="landmark" aria-describedby="landmark_error">
+                    <span class="error-message" id="landmark_error"></span>
+                </div>
+                <div>
+                    <label for="alternate_phone">Alternate Phone</label>
+                    <input type="tel" id="alternate_phone" name="alternate_phone" pattern="[0-9]{10,15}" aria-describedby="alternate_phone_error">
+                    <span class="error-message" id="alternate_phone_error">Valid 10-15 digit phone number is required</span>
+                </div>
+                <div>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="default_address" class="h-5 w-5 text-primary-gold focus:ring-primary-gold border-gray-300 rounded">
+                        Set as Default Address
+                    </label>
+                </div>
+                <button type="submit"><span>Save Address</span></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button
+                        class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png"
+                        alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png"
+                        alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay"
+                        class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            easing: 'ease-out-cubic'
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const addressCards = document.querySelectorAll('.address-card');
+            const proceedBtn = document.getElementById('proceedBtn');
+            const addressForm = document.getElementById('addressForm');
+            const addAddressBtn = document.getElementById('addAddressBtn');
+            const addAddressModal = document.getElementById('addAddressModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const addAddressForm = document.getElementById('addAddressForm');
+
+            // Enable proceed button if default address is selected
+            const defaultSelected = document.querySelector('input[name="address_id"]:checked');
+            if (defaultSelected) {
+                proceedBtn.disabled = false;
+            }
+
+            // Address card selection
+            addressCards.forEach(card => {
+                card.addEventListener('click', function () {
+                    addressCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[name="address_id"]');
+                    if (radio) {
+                        radio.checked = true;
+                        proceedBtn.disabled = false;
+                    }
+                });
+            });
+
+            // Form submission validation
+            addressForm.addEventListener('submit', function (e) {
+                const selectedAddress = document.querySelector('input[name="address_id"]:checked');
+                if (!selectedAddress) {
+                    e.preventDefault();
+                    showPopup('Please select an address to proceed.', 'error');
+                }
+            });
+
+            // Open modal
+            addAddressBtn.addEventListener('click', function () {
+                addAddressModal.classList.add('show');
+                document.querySelector('.modal-content').scrollTop = 0;
+                AOS.refresh();
+            });
+
+            // Close modal
+            closeModalBtn.addEventListener('click', function () {
+                addAddressModal.classList.remove('show');
+                addAddressForm.reset();
+                clearFormErrors();
+            });
+
+            // Close modal on backdrop click
+            addAddressModal.addEventListener('click', function (e) {
+                if (e.target === addAddressModal) {
+                    addAddressModal.classList.remove('show');
+                    addAddressForm.reset();
+                    clearFormErrors();
+                }
+            });
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && addAddressModal.classList.contains('show')) {
+                    addAddressModal.classList.remove('show');
+                    addAddressForm.reset();
+                    clearFormErrors();
+                }
+            });
+
+            // Form submission
+            addAddressForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (validateForm()) {
+                    const submitBtn = addAddressForm.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('loading');
+                    const formData = new FormData(addAddressForm);
+                    fetch('/add-address', {
+                        method: 'POST',
+                        body: formData,
+                        credentials: 'include'
+                    })
+                        .then(response => {
+                            if (response.status === 404) {
+                                throw new Error('Address endpoint not found. Please contact support.');
+                            }
+                            if (!response.ok) {
+                                throw new Error('Failed to add address: ' + response.statusText);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('loading');
+                            if (data.message === 'Address added successfully') {
+                                showPopup('Address added successfully!', 'success');
+                                addAddressToGrid(data.address);
+                                addAddressModal.classList.remove('show');
+                                addAddressForm.reset();
+                                clearFormErrors();
+                                proceedBtn.disabled = false;
+                                setTimeout(() => window.location.reload(), 1000);
+                            } else {
+                                showPopup(data.error || 'Failed to add address.', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('loading');
+                            console.error('Error adding address:', error);
+                            showPopup(error.message || 'An error occurred while adding the address.', 'error');
+                        });
+                }
+            });
+
+            // Form validation
+            function validateForm() {
+                let isValid = true;
+                clearFormErrors();
+
+                const fields = [
+                    { id: 'first_name', errorId: 'first_name_error', message: 'First name is required', required: true },
+                    { id: 'last_name', errorId: 'last_name_error', message: 'Last name is required', required: true },
+                    { id: 'phone_number', errorId: 'phone_number_error', message: 'Valid 10-15 digit phone number is required', required: true, pattern: /^[0-9]{10,15}$/ },
+                    { id: 'country', errorId: 'country_error', message: 'Country is required', required: true },
+                    { id: 'postcode', errorId: 'postcode_error', message: 'Valid 5-10 digit postcode is required', required: true, pattern: /^[0-9]{5,10}$/ },
+                    { id: 'state', errorId: 'state_error', message: 'State is required', required: true },
+                    { id: 'city', errorId: 'city_error', message: 'City is required', required: true },
+                    { id: 'address', errorId: 'address_error', message: 'Address is required', required: true },
+                    { id: 'email', errorId: 'email_error', message: 'Valid email is required', required: false, pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/ },
+                    { id: 'alternate_phone', errorId: 'alternate_phone_error', message: 'Valid 10-15 digit phone number is required', required: false, pattern: /^[0-9]{10,15}$/ }
+                ];
+
+                fields.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    const errorElement = document.getElementById(field.errorId);
+                    const value = input.value.trim();
+
+                    if (field.required && !value) {
+                        showError(input, errorElement, field.message);
+                        isValid = false;
+                    } else if (value && field.pattern && !field.pattern.test(value)) {
+                        showError(input, errorElement, field.message);
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            function showError(input, errorElement, message) {
+                input.classList.add('error');
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+
+            function clearFormErrors() {
+                const inputs = addAddressForm.querySelectorAll('input, select');
+                const errorElements = addAddressForm.querySelectorAll('.error-message');
+                inputs.forEach(input => input.classList.remove('error'));
+                errorElements.forEach(error => {
+                    error.style.display = 'none';
+                    error.textContent = '';
+                });
+            }
+
+            // Add new address to grid
+            function addAddressToGrid(address) {
+                const addressGrid = document.querySelector('.address-grid');
+                const noAddressMsg = addressGrid.querySelector('.text-center');
+                if (noAddressMsg) {
+                    noAddressMsg.remove();
+                }
+
+                const isDefault = address.default_address;
+                if (isDefault) {
+                    addressCards.forEach(card => {
+                        card.classList.remove('selected');
+                        const badge = card.querySelector('.default-badge');
+                        if (badge) badge.remove();
+                        const radio = card.querySelector('input[name="address_id"]');
+                        if (radio) radio.checked = false;
+                    });
+                }
+
+                const newCard = document.createElement('div');
+                newCard.className = `address-card ${isDefault ? 'selected' : ''}`;
+                newCard.dataset.addressId = address.id;
+                newCard.setAttribute('data-tilt', '');
+                newCard.setAttribute('data-tilt-max', '10');
+                newCard.setAttribute('data-tilt-speed', '400');
+                newCard.setAttribute('data-tilt-glare', '');
+                newCard.setAttribute('data-tilt-max-glare', '0.3');
+                newCard.innerHTML = `
+                    <input type="radio" name="address_id" id="address_${address.id}" value="${address.id}" ${isDefault ? 'checked' : ''} style="display:none;" aria-label="Select address for ${address.first_name} ${address.last_name}">
+                    <h3>${address.first_name} ${address.last_name} ${isDefault ? '<span class="default-badge">Default</span>' : ''}</h3>
+                    <p>${address.address}</p>
+                    <p>${address.city}, ${address.state} ${address.postcode}</p>
+                    <p>${address.country}</p>
+                    <p>Phone: ${address.phone_number}</p>
+                    ${address.alternate_phone ? `<p>Alt. Phone: ${address.alternate_phone}</p>` : ''}
+                    ${address.landmark ? `<p>Landmark: ${address.landmark}</p>` : ''}
+                `;
+                addressGrid.appendChild(newCard);
+
+                // Reinitialize Tilt for new card
+                VanillaTilt.init(newCard, {
+                    max: 10,
+                    speed: 400,
+                    glare: true,
+                    'max-glare': 0.3
+                });
+
+                newCard.addEventListener('click', function () {
+                    addressCards.forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    const radio = this.querySelector('input[name="address_id"]');
+                    if (radio) {
+                        radio.checked = true;
+                        proceedBtn.disabled = false;
+                    }
+                });
+
+                addressCards.forEach(card => card.classList.remove('selected'));
+                newCard.classList.add('selected');
+                const radio = newCard.querySelector('input[name="address_id"]');
+                if (radio) radio.checked = true;
+            }
+
+            // Show popup
+            function showPopup(message, type = 'success') {
+                const popup = document.createElement('div');
+                popup.className = `popup ${type}`;
+                popup.innerHTML = `
+                    <div class="popup-content">
+                        <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+                setTimeout(() => popup.classList.add('show'), 10);
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    setTimeout(() => popup.remove(), 300);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>

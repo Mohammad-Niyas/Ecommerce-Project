@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VogueLuxe - Orders Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <div class="w-64 bg-white shadow-lg p-4">
+            <div class="mb-8">
+                <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLux Logo" class="h-10 w-auto">
+            </div>
+            <nav class="space-y-4">
+                <a href="/admin/dashboard" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🏠</span> Dashboard
+                </a>
+                <a href="/admin/products" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛍️</span> Products
+                </a>
+                <a href="/admin/users-management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">👤</span> Users
+                </a>
+                <a href="/admin/orders" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">🛒</span> Orders
+                </a>
+                <a href="/admin/categories" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">📅</span> Category
+                </a>
+                <a href="/admin/coupon/management" class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg">
+                    <span class="mr-2">💸</span> Coupons
+                </a>
+                <a href="/admin/wallet"
+                    class="flex items-center p-2 text-gray-500 hover:bg-gray-200 rounded-lg transition duration-200">
+                    <span class="mr-2">💳</span> Wallet
+                </a>
+                <button class="w-full bg-black text-white p-2 rounded-lg hover:bg-gray-800">
+                    <a href="/admin/logout" class="text-white no-underline">Logout</a>
+                </button>
+            </nav>
+        </div>
+
+        <div class="flex-1 p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Orders Management</h1>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-semibold">Orders ({{len .OrderItems}})</h2>
+                </div>
+                <table class="w-full">
+                    <thead>
+                        <tr class="text-left text-gray-500">
+                            <th class="py-2">Order ID</th>
+                            <th class="py-2">Customer</th>
+                            <th class="py-2">Date</th>
+                            <th class="py-2">Status</th>
+                            <th class="py-2">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .OrderItems}}
+                        <tr class="border-t">
+                            <td class="py-2">{{.OrderUID}}</td>
+                            <td class="py-2">{{.CustomerName}}</td>
+                            <td class="py-2">{{.OrderDate}}</td>
+                            <td class="py-2">
+                                <span class="px-2 py-1 rounded-lg text-white {{if eq .OrderStatus `Processing`}}bg-yellow-500{{else if eq .OrderStatus `Out for Delivery`}}bg-purple-500{{else if eq .OrderStatus `Shipped`}}bg-green-500{{else if eq .OrderStatus `Delivered`}}bg-blue-500{{else if eq .OrderStatus `Cancelled`}}bg-red-500{{else if eq .OrderStatus `Pending`}}bg-orange-500{{else}}bg-gray-500{{end}}">
+                                    {{.OrderStatus}}
+                                </span>
+                            </td>
+                            <td class="py-2">
+                                <a href="/admin/order/details?order_id={{.OrderUID}}" class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600">
+                                    Details
+                                </a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="5" class="py-2 text-center text-gray-500">No orders found</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products - VogueLuxe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Lora', serif; background-color: #f8f9fa; color: #1a1a1a; margin: 0; padding: 0; overflow-x: hidden; }
+        .sticky-nav { position: sticky; top: 0; background: #ffffff; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); z-index: 999; }
+        .logo-corner img { width: 150px; height: auto; transition: transform 0.3s ease; }
+        .logo-corner img:hover { transform: scale(1.05); }
+        #categoriesDropdown { z-index: 1000; }
+        .products-section { padding: 5rem 0; }
+        .section-title { font-family: 'Playfair Display', serif; letter-spacing: 0.05em; }
+        .product-card { background: #ffffff; border: 1px solid #e5e5e5; border-radius: 15px; overflow: hidden; transition: transform 0.4s ease, box-shadow 0.4s ease; }
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); }
+        .product-image { transition: transform 0.6s ease-in-out; width: 100%; height: 100%; object-fit: cover; }
+        .product-card:hover .product-image { transform: scale(1.08); }
+        .product-overlay { background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent); }
+        .wishlist-btn, .cart-btn { background: rgba(255, 255, 255, 0.9); transition: all 0.3s ease; }
+        .wishlist-btn:hover { background: #000000; color: #ffffff; }
+        .cart-btn { position: absolute; bottom: 1rem; right: 1rem; opacity: 0; transition: opacity 0.3s ease-in-out; padding: 0.75rem; border-radius: 50%; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        .group:hover .cart-btn { opacity: 1; }
+        .breadcrumb { font-family: 'Lora', serif; font-size: 0.875rem; color: #666666; margin-bottom: 1rem; }
+        .breadcrumb a { color: #666666; transition: color 0.3s ease; }
+        .breadcrumb a:hover { color: #000000; }
+        .user-dropdown { position: absolute; right: 0; top: 100%; width: 200px; background: #ffffff; border-radius: 8px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); transform: scaleY(0); transform-origin: top; transition: transform 0.3s ease, opacity 0.3s ease; opacity: 0; z-index: 100; }
+        .user-dropdown.active { transform: scaleY(1); opacity: 1; }
+        .user-dropdown a { display: block; padding: 10px 15px; color: #333333; text-decoration: none; transition: background 0.3s ease, color 0.3s ease; }
+        .user-dropdown a:hover { background: #f1f1f1; color: #000000; }
+        .user-icon-container { position: relative; }
+        .filter-sidebar { background: #ffffff; border-right: 1px solid #e5e5e5; padding: 2rem; width: 300px; position: sticky; top: 5rem; height: calc(100vh - 5rem); overflow-y: auto; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05); }
+        .filter-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #000000; margin-bottom: 1.5rem; border-bottom: 2px solid #000000; padding-bottom: 0.5rem; }
+        .filter-group { margin-bottom: 2rem; }
+        .filter-group h4 { font-size: 1.125rem; font-weight: 600; color: #000000; margin-bottom: 1rem; }
+        .filter-checkbox, .filter-range { margin-bottom: 0.75rem; }
+        .filter-checkbox label { color: #666666; font-size: 0.95rem; cursor: pointer; transition: color 0.3s ease; }
+        .filter-checkbox input:checked+label { color: #000000; font-weight: 600; }
+        .filter-range input { width: 100%; accent-color: #000000; }
+        .filter-range span { color: #666666; font-size: 0.875rem; }
+        .cart-badge { background-color: #e63946; color: #ffffff; border-radius: 50%; padding: 0.2rem 0.5rem; font-size: 0.75rem; display: inline-flex; align-items: center; justify-content: center; }
+        .discount-badge { position: absolute; top: 0.5rem; left: 0.5rem; background: linear-gradient(135deg, #ff6b6b, #ff8e53); color: #ffffff; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem; border-radius: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); z-index: 10; text-transform: uppercase; letter-spacing: 0.03em; }
+        .clear-filter-btn { background: #e63946; color: #ffffff; transition: background 0.3s ease; }
+        .clear-filter-btn:hover { background: #cc333f; }
+        @media (max-width: 768px) {
+            .filter-sidebar { width: 100%; position: relative; height: auto; border-right: none; border-bottom: 1px solid #e5e5e5; }
+            .products-container { flex-direction: column; }
+            .product-grid { grid-template-columns: 1fr; }
+            .discount-badge { font-size: 0.65rem; padding: 0.2rem 0.4rem; }
+        }
+        /* Popup Styles */
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .popup.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .popup.success {
+            background: linear-gradient(135deg, #34c759, #28a745);
+            color: #ffffff;
+        }
+        .popup.error {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+            color: #ffffff;
+        }
+        .popup .popup-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .popup .popup-content i {
+            font-size: 1.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="sticky-nav py-4 bg-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-8">
+                    <div class="logo-corner">
+                        <a href="/">
+                            <img src="https://res.cloudinary.com/dglu2jbfs/image/upload/v1741584877/vtthk93mo4cfoftnylbp.png" alt="VogueLuxe Logo">
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <button id="categoriesButton" class="flex items-center space-x-2 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 focus:outline-none transition-all duration-300" aria-expanded="false">
+                            <i class="fas fa-th-large"></i>
+                            <span class="font-semibold">Categories</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="categoriesDropdown" class="absolute left-0 mt-2 w-56 bg-black text-white rounded-lg shadow-xl hidden transition-all duration-300 transform origin-top scale-y-0">
+                            {{range .categories}}
+                            <a href="/product?category={{.ID}}" class="block px-4 py-3 hover:bg-gray-800">{{.CategoryName}}</a>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 mx-8">
+                    <div class="relative">
+                        <input type="text" placeholder="Search the products..." class="w-full bg-gray-100 text-black rounded-full py-2 px-10 focus:outline-none focus:ring-2 focus:ring-gray-300" id="searchInput" value="{{.search}}">
+                        <i class="fas fa-search absolute left-3 top-2.5 text-gray-500"></i>
+                        <button class="absolute right-3 top-2 bg-black text-white px-3 py-1 rounded-full hover:bg-gray-800 transition-colors" onclick="searchProducts()">Search</button>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-5">
+                        <a href="/" class="text-black hover:text-gray-600 transition-colors" title="Home"><i class="fas fa-home text-xl"></i></a>
+                        <a href="/wishlist" class="text-black hover:text-gray-600 transition-colors" title="Wishlist"><i class="far fa-heart text-xl"></i></a>
+                        <div class="user-icon-container relative">
+                            <button id="userButton" class="text-black hover:text-gray-600 transition-colors focus:outline-none" title="User">
+                                <i class="far fa-user text-xl"></i>
+                            </button>
+                            <div id="userDropdown" class="user-dropdown hidden">
+                                {{if .isLoggedIn}}
+                                <a href="/profile" class="flex items-center space-x-2"><i class="fas fa-user-circle text-gray-600"></i><span>User Profile</span></a>
+                                <a href="/logout" class="flex items-center space-x-2"><i class="fas fa-sign-out-alt text-gray-600"></i><span>Logout</span></a>
+                                {{else}}
+                                <a href="/signup" class="flex items-center space-x-2"><i class="fas fa-user-plus text-gray-600"></i><span>Sign Up</span></a>
+                                <a href="/login" class="flex items-center space-x-2"><i class="fas fa-sign-in-alt text-gray-600"></i><span>Login</span></a>
+                                {{end}}
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <a href="/cart" class="text-black hover:text-gray-600 transition-colors" title="Cart"><i class="fas fa-shopping-bag text-xl"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-center mt-4 space-x-8">
+                <a href="/product" class="text-black hover:text-gray-600 transition-colors">Products</a>
+                <a href="/new-arrivals" class="text-black hover:text-gray-600 transition-colors">New Arrivals</a>
+                <a href="/special-offers" class="text-black hover:text-gray-600 transition-colors">Special Offers</a>
+                <a href="/help" class="text-black hover:text-gray-600 transition-colors">Help Center</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Products Section with Filter Sidebar -->
+    <section class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 max-w-6xl flex">
+            <div class="filter-sidebar">
+                <h3 class="filter-title">Filters</h3>
+                <form id="filterForm" action="/product" method="GET">
+                    <input type="hidden" name="search" value="{{.search}}">
+                    <div class="filter-group">
+                        <h4>Categories</h4>
+                        {{range .categories}}
+                        <div class="filter-checkbox">
+                            <input type="checkbox" name="category" value="{{.ID}}" id="cat-{{.ID}}" {{if .Selected}}checked{{end}}>
+                            <label for="cat-{{.ID}}">{{.CategoryName}}</label>
+                        </div>
+                        {{end}}
+                    </div>
+                    <div class="filter-group">
+                        <h4>Price Range</h4>
+                        <div class="filter-range">
+                            <span>Min: ₹<span id="priceMinOutput">{{.priceMin}}</span></span>
+                            <input type="range" name="price_min" min="0" max="10000" value="{{.priceMin}}" step="100" id="priceMin">
+                        </div>
+                        <div class="filter-range">
+                            <span>Max: ₹<span id="priceMaxOutput">{{.priceMax}}</span></span>
+                            <input type="range" name="price_max" min="0" max="10000" value="{{.priceMax}}" step="100" id="priceMax">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <h4>Brands</h4>
+                        {{range .brands}}
+                        <div class="filter-checkbox">
+                            <input type="checkbox" name="brand" value="{{.Name}}" id="brand-{{.Name}}" {{if .Selected}}checked{{end}}>
+                            <label for="brand-{{.Name}}">{{.Name}}</label>
+                        </div>
+                        {{end}}
+                    </div>
+                    <div class="flex gap-4">
+                        <button type="submit" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-all duration-300 flex-1">Apply Filters</button>
+                        <button type="button" onclick="clearFilters()" class="clear-filter-btn px-6 py-2 rounded-lg flex-1" aria-label="Clear all filters">Clear Filters</button>
+                    </div>
+                </form>
+            </div>
+            <div class="flex-1 pl-8">
+                <div class="flex justify-between items-center mb-12">
+                    <h3 class="text-4xl font-bold text-gray-900 tracking-tight">Products ({{.totalProducts}})</h3>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {{range .products}}
+                    <a href="/product/{{.Product.ID}}" class="block">
+                        <div class="product-card group">
+                            <div class="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+                                {{if .Product.Images}}
+                                <img src="{{(index .Product.Images 0).ImageURL}}" alt="{{.Product.ProductName}}" class="product-image">
+                                {{else}}
+                                <img src="https://via.placeholder.com/500x375" alt="{{.Product.ProductName}}" class="product-image">
+                                {{end}}
+                                <div class="absolute inset-0 product-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-400"></div>
+                                {{if $.isLoggedIn}}
+                                <button class="wishlist-btn absolute top-4 right-4 opacity-0 group-hover:opacity-100 rounded-full p-2 shadow-md" onclick="event.preventDefault(); event.stopPropagation(); addToWishlist('{{.Product.ID}}', '{{if .Product.Variants}}{{(index .Product.Variants 0).ID}}{{else}}0{{end}}')">
+                                    <i class="far fa-heart text-gray-800 text-base"></i>
+                                </button>
+                                <button class="cart-btn bg-black text-white" onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{.Product.ID}}', '{{if .Product.Variants}}{{(index .Product.Variants 0).ID}}{{else}}0{{end}}')">
+                                    <i class="fas fa-shopping-cart text-base"></i>
+                                </button>
+                                {{end}}
+                                {{if and (ne .Discount 0.0) (gt .Discount 0.0)}}
+                                <span class="discount-badge">{{printf "%.0f" .Discount}}% OFF</span>
+                                {{end}}
+                            </div>
+                            <div class="p-6 text-center">
+                                <h3 class="text-gray-900 font-medium text-lg truncate">{{.Product.ProductName}}</h3>
+                                <p class="mt-3 text-gray-700 text-sm">
+                                    {{if and (ne .Discount 0.0) (gt .Discount 0.0)}}
+                                    <span class="line-through text-gray-500 font-medium">₹{{printf "%.2f" (index .Product.Variants 0).ActualPrice}}</span>
+                                    <span class="ml-2 text-gray-900 font-semibold">₹{{printf "%.2f" .SellingPrice}}</span>
+                                    {{else}}
+                                    <span class="text-gray-900 font-semibold">₹{{printf "%.2f" .SellingPrice}}</span>
+                                    {{end}}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                    {{else}}
+                    <p class="text-gray-700 text-center col-span-full text-lg">No products available.</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 max-w-5xl">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white mb-4 tracking-tight">VogueLuxe</h3>
+                    <p class="text-gray-400 text-sm mb-4">Premium fashion, exceptional service. Reach out anytime.</p>
+                    <button class="bg-gradient-to-r from-gray-100 to-gray-300 text-gray-900 px-6 py-2 rounded-full hover:from-gray-200 hover:to-gray-400 transition-all duration-300 flex items-center space-x-2 text-sm font-medium">
+                        <span>Contact Us</span>
+                        <i class="fas fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Company</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Our Team</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Account</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Your Account</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Shipping</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Refunds</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Delivery</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white mb-4 uppercase tracking-wider">Support</h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Payment Methods</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Guarantee</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Returns</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors duration-200">Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex flex-col md:flex-row justify-between items-center border-t border-gray-800 pt-6">
+                <div class="text-xs text-gray-500 mb-4 md:mb-0">Shirt • T-Shirt • Pants • Joggers • Jacket</div>
+                <div class="flex items-center space-x-4">
+                    <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1200px-MasterCard_Logo.svg.png" alt="MasterCard" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png" alt="PayPal" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                    <img src="https://www.svgrepo.com/show/353822/google-pay-icon.svg" alt="Google Pay" class="h-6 opacity-70 hover:opacity-100 transition-opacity duration-200">
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6">
+                © 2025 VogueLuxe. All rights reserved. Crafted with precision.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Dropdown Toggles
+        document.getElementById('categoriesButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('categoriesDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('scale-y-100');
+            this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'false' ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('categoriesButton');
+            const dropdown = document.getElementById('categoriesDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('scale-y-100');
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        document.getElementById('userButton').addEventListener('click', function () {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+            dropdown.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function (event) {
+            const button = document.getElementById('userButton');
+            const dropdown = document.getElementById('userDropdown');
+            if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Search
+        function searchProducts() {
+            const query = document.getElementById('searchInput').value.trim();
+            window.location.href = `/product?search=${encodeURIComponent(query)}`;
+        }
+
+        // Price Range Sliders
+        document.getElementById('priceMin').addEventListener('input', function () {
+            const priceMin = parseInt(this.value);
+            const priceMax = parseInt(document.getElementById('priceMax').value);
+            if (priceMin > priceMax) {
+                document.getElementById('priceMax').value = priceMin;
+                document.getElementById('priceMaxOutput').textContent = priceMin;
+            }
+            document.getElementById('priceMinOutput').textContent = priceMin;
+        });
+
+        document.getElementById('priceMax').addEventListener('input', function () {
+            const priceMax = parseInt(this.value);
+            const priceMin = parseInt(document.getElementById('priceMin').value);
+            if (priceMax < priceMin) {
+                document.getElementById('priceMin').value = priceMax;
+                document.getElementById('priceMinOutput').textContent = priceMax;
+            }
+            document.getElementById('priceMaxOutput').textContent = priceMax;
+        });
+
+        // Clear Filters
+        function clearFilters() {
+            // Reset form inputs
+            const form = document.getElementById('filterForm');
+            form.reset();
+            document.getElementById('priceMin').value = 0;
+            document.getElementById('priceMax').value = 10000;
+            document.getElementById('priceMinOutput').textContent = '0';
+            document.getElementById('priceMaxOutput').textContent = '10000';
+            form.querySelector('input[name="search"]').value = '';
+            // Redirect to /product without query parameters
+            window.location.href = '/product';
+        }
+
+        function showPopup(message, type = 'success') {
+            const popup = document.createElement('div');
+            popup.className = `popup ${type}`;
+            popup.innerHTML = `
+                <div class="popup-content">
+                    <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            setTimeout(() => popup.classList.add('show'), 10);
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.remove(), 300);
+            }, 3000);
+        }
+
+        function addToCart(productId, variantId) {
+            event.preventDefault();
+            event.stopPropagation();
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ product_id: parseInt(productId), variant_id: parseInt(variantId), quantity: 1 })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to add to cart');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'Success') {
+                        showPopup('Item added to cart successfully!', 'success');
+                        updateCartBadge();
+                    } else {
+                        showPopup('Failed to add item: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to cart:', error);
+                    // showPopup('An error occurred while adding to cart.', 'error');
+                });
+        }
+
+        function addToWishlist(productId, variantId) {
+            event.preventDefault();
+            event.stopPropagation();
+            fetch('/wishlist/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ product_id: parseInt(productId), variant_id: parseInt(variantId) })
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to add to wishlist');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'Success') {
+                        showPopup(data.message, 'success');
+                    } else {
+                        showPopup('Error: ' + data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error adding to wishlist:', error);
+                    showPopup('An error occurred while adding to wishlist.', 'error');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartBadge();
+            // Initialize price range outputs
+            const priceMin = document.getElementById('priceMin');
+            const priceMax = document.getElementById('priceMax');
+            document.getElementById('priceMinOutput').textContent = priceMin.value;
+            document.getElementById('priceMaxOutput').textContent = priceMax.value;
+        });
+    </script>
+</body>
+</html>
