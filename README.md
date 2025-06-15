@@ -37,7 +37,7 @@ This is a full-fledged e-commerce website built using the **Gin** framework in *
 
 - **Frontend:** HTML, Tailwind Css
 
-- - **Payment Gateway:** Razorpay
+- **Payment Gateway:** Razorpay
 
 - **Deployment:** AWS (EC2, S3, RDS, Nginx, TLS/SSL)
 
