@@ -133,3 +133,30 @@ func AuthMiddleware(requiredRole string) gin.HandlerFunc {
         c.Next()
     }
 }
+
+func NoCacheMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        c.Header("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
+        c.Header("Pragma", "no-cache")
+        c.Header("Expires", "0")
+        c.Next()
+    }
+}
+
+func RedirectIfAuthenticated() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        tokenString, err := c.Cookie("jwtTokensUser")
+        if err == nil && tokenString != "" {
+            claims := &Claims{}
+            token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+                return jwtKey, nil
+            })
+            if err == nil && token.Valid && claims.Role == "User" {
+                c.Redirect(http.StatusSeeOther, "/")
+                c.Abort()
+                return
+            }
+        }
+        c.Next()
+    }
+}

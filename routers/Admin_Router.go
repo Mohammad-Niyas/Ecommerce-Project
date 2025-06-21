@@ -10,8 +10,8 @@ import (
 var RoleAdmin = "Admin"
 
 func AdminRoutes(r *gin.Engine){
-	r.GET("/admin/login", controllers.AdminLoginPage)
-	r.POST("/admin/login",controllers.AdminLogin)
+	r.GET("/admin/login",middleware.NoCacheMiddleware(), controllers.AdminLoginPage)
+	r.POST("/admin/login",middleware.NoCacheMiddleware(),controllers.AdminLogin)
 	r.GET("/admin/dashboard",middleware.AuthMiddleware(RoleAdmin),controllers.AdminDashboard)
 	r.GET("/admin/dashboard/data",middleware.AuthMiddleware(RoleAdmin), controllers.GetDashboardData)
 	r.GET("/admin/download/pdf",middleware.AuthMiddleware(RoleAdmin), controllers.DownloadPDF)

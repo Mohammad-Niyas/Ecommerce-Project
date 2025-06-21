@@ -2430,7 +2430,7 @@ func DownloadInvoice(c *gin.Context) {
 	if err := config.DB.
 		Preload("ShippingAddress").
 		Preload("PaymentDetails").
-		Preload("OrderItem").
+		Preload("OrderItem", "order_status != ?", "Cancelled").
 		Preload("OrderItem.Product").
 		Preload("OrderItem.Product.Images").
 		Preload("Coupon").
