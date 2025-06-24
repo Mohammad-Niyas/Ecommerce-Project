@@ -2,12 +2,14 @@ package main
 
 import (
 	"ecommerce/config"
+	"ecommerce/pkg/logger"
 	"ecommerce/routers"
 
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
+	logger.InitLogger()
 	config.Envload()
 	config.DBconnect()
 }

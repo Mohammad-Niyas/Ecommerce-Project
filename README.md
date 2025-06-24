@@ -23,7 +23,9 @@ This is a full-fledged e-commerce website built using the **Gin** framework in *
 
 ✔️ **Stock Management** – Prevents overselling  
 
-✔️ **Order Tracking** – Status updates for users  
+✔️ **Order Tracking** – Status updates for users 
+
+✔️ **Logging** – Implemented using **Zap Logger** 
 
 ✔️ **Responsive UI** – Built with **HTML + Tailwind CSS**    
 
