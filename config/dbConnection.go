@@ -15,21 +15,37 @@ var DB *gorm.DB
 func DBconnect() {
     logger.Log.Info("Attempting to connect to database")
 
-    dsn := os.Getenv("DSN")
-    if dsn == "" {
-        logger.Log.Fatal("DSN environment variable not set",
-            zap.String("environmentVariable", "DSN"))
-    }
+	dbHost := os.Getenv("DB_HOST")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
 
-    logger.Log.Debug("Database connection parameters loaded",
-        zap.String("source", "environment"))
+	if dbHost == "" || dbUser == "" || dbPassword == "" || dbName == "" || dbPort == "" {
+		logger.Log.Fatal("One or more database environment variables are missing",
+			zap.String("DB_HOST", dbHost),
+			zap.String("DB_USER", dbUser),
+			zap.String("DB_NAME", dbName),
+			zap.String("DB_PORT", dbPort),
+		)
+	}
 
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-    if err != nil {
-        logger.Log.Fatal("Failed to establish database connection",
-            zap.Error(err),
-            zap.String("connectionMethod", "gorm.Open"))
-    }
+	dsn := "host=" + dbHost +
+		" user=" + dbUser +
+		" password=" + dbPassword +
+		" dbname=" + dbName +
+		" port=" + dbPort +
+		" sslmode=require"
+
+	logger.Log.Debug("Database DSN created successfully")
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		logger.Log.Fatal("Failed to establish database connection",
+			zap.Error(err),
+			zap.String("connectionMethod", "gorm.Open"),
+		)
+	}
 
     logger.Log.Info("Database connection established successfully")
     DB = db
