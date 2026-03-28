@@ -1,116 +1,142 @@
-# 🛍️ E-Commerce Website (Golang + Gin + GORM + PostgreSQL + AWS)
+# VogueLuxe E-Commerce Platform: Technical Documentation
 
-## 📌 Project Overview
+A robust, enterprise-grade e-commerce engine built using **Golang** and the **MVC (Model-View-Controller)** architecture. This platform is designed for high-performance retail operations, featuring scalable service integrations and a secure, cloud-native deployment strategy.
 
-This is a full-fledged e-commerce website built using the **Gin** framework in **Golang**, following the **MVC architecture**. The project includes both admin and user sides, handling:  
-✅ Product management  
-✅ Stock management  
-✅ User authentication  
-✅ Order processing  
-✅ Payment integration with **Razorpay** 
+---
 
-## 🚀 Features
+## 🛠️ Technology Stack
 
-✔️ **User Authentication** – Signup, login, logout, password reset 
+### Core Backend
+- **Language**: Go (v1.24.0) — Chosen for its efficiency in concurrent processing and low memory footprint.
+- **Web Framework**: [Gin-Gonic v1.11](https://gin-gonic.com/) — A high-performance HTTP web framework with a minimalist API.
+- **ORM**: [GORM v1.25+](https://gorm.io/) — Used for streamlined database interactions and automated schema migrations.
+- **Database**: [PostgreSQL](https://www.postgresql.org/) — Relational database management system for transactional data integrity.
 
-✔️ **Admin Dashboard** – Manage products and orders  
+### Integrated Services
+- **Payments**: [Razorpay API](https://razorpay.com/) — Handles secure checkouts, payment verification, and transaction logging.
+- **Authentication**: 
+  - **JWT (JSON Web Tokens)** — For stateless session management between the client and server.
+  - **Google OAuth 2.0** — Social login integration for enhanced user accessibility.
+- **Communications**: [Brevo (formerly Sendinblue)](https://www.brevo.com/) — SMTP/API service for transactional emails and OTP (One-Time Password) generation.
+- **CDN/Storage**: [Cloudinary](https://cloudinary.com/) — Automated image optimization and cloud storage for product assets.
+- **Logging**: [Uber-Zap](https://github.com/uber-go/zap) — Blazing fast, structured, leveled logging for production debugging.
 
-✔️ **Product Catalog** – Categories, search, and filters  
+### Frontend
+- **Templating**: Gin's built-in `html/template` engine for server-side rendering (SSR).
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) — Utility-first CSS framework for responsive and modern UI design.
 
-✔️ **Shopping Cart & Checkout** – Seamless user experience  
+---
 
-✔️ **Secure Payments** – Integrated with **Razorpay**  
+## 🏗️ Architectural Overview
 
-✔️ **Stock Management** – Prevents overselling  
+The project follows a strict **MVC (Model-View-Controller)** pattern to ensure a clean separation of concerns and maintainability.
 
-✔️ **Order Tracking** – Status updates for users 
+### Data Flow Pattern
+1. **Client Request**: Originates from the user's browser or an API client.
+2. **Middleware**: JWT verification, role-based access control (RBAC), and request logging occur before reaching the controller.
+3. **Controller**: Validates entry parameters and invokes the necessary business logic.
+4. **Model/Service**: Interactions with PostgreSQL via GORM or external APIs (Razorpay/Cloudinary).
+5. **View/Response**: The server renders an HTML template (using Gin's `LoadHTMLGlob`) or returns a structured JSON response.
 
-✔️ **Logging** – Implemented using **Zap Logger** 
+### Core Modules
+| Module | Description |
+| :--- | :--- |
+| **User & Auth** | Signup/Login with OTP verification, Google OAuth integration, and JWT session handling. |
+| **Catalog System** | Multi-level category management with dynamic product filtering and search. |
+| **Order Engine** | Transactional flow from cart to fulfillment, including PDF invoice generation. |
+| **Inventory** | Real-time stock tracking with automated updates upon order completion. |
+| **Promotions** | Coupon management system with validity checks and discount calculations. |
+| **Wallets** | Integrated credit system for users to store and spend balance within the app. |
 
-✔️ **Responsive UI** – Built with **HTML + Tailwind CSS**    
+---
 
-✔️ **Hosting & Security** – AWS, Nginx, HTTPS/TLS
+## 📂 Project Structure
 
-## 🛠️ Tech Stack
-
-**Backend:** Golang (Gin framework)
-
-- **Database:** PostgreSQL with GORM ORM
-
-- **Frontend:** HTML, Tailwind Css
-
-- **Payment Gateway:** Razorpay
-
-- **Deployment:** AWS (EC2, S3, RDS, Nginx, TLS/SSL)
-
-- **Security:** HTTPS with TLS
-
-## Installation and Setup
-
-### 📌 Prerequisites:
-
-✔️ Golang installed
-
-✔️ PostgreSQL database setup
-
-✔️ AWS instance with Nginx configured
-
-## Steps to Run the Project:
-
-### 1️⃣ Clone the repository:
-
-```sh
-git clone https://github.com/Mohammad-Niyas/Ecommerce-Project.git
-cd E-Commerce-Website
+```text
+Ecommerce-Project/
+├── config/             # Configuration logic (DB, Env, Google Auth)
+├── controllers/        # Business logic for Admin, Users, Products, etc.
+├── k8s/                # Kubernetes Deployment & Service manifests
+├── middleware/         # Auth (JWT), Logging, and UI Access Checkers
+├── models/             # GORM Entity definitions and Database schema
+├── pkg/                # Reusable packages (Logger setup)
+├── routers/            # Route definitions for User and Admin panels
+├── utils/              # Third-party integrations (Cloudinary, Razorpay, OTP)
+├── views/              # SSR HTML Templates (Admin/User subdirectories)
+├── main.go             # Application entry point & Server initialization
+├── go.mod/go.sum       # Dependency management
+├── Dockerfile          # Containerization manifest
+└── Makefile            # Build and Automation commands
 ```
 
-### 2️⃣ Set up environment variables:
+---
 
-Create a `.env` file and configure database credentials, AWS settings, and Razorpay keys.
+## 🚀 Getting Started
 
-```sh
+### 📋 Prerequisites
+- **Go 1.24+**: For compiling and running the backend.
+- **PostgreSQL**: A running instance with a dedicated database.
+- **Docker/K8s** (Optional): For containerized local development or production clusters.
+
+### ⚙️ Environment Configuration
+Create a `.env` file in the root directory with the following keys:
+```env
+# Server
 PORT=8080
-DB=host=your-db-host user=your-db-user password=your-db-password dbname=your-db-name port=your-db-port
-SECRETKEY=your-jwt-secretkey
-CLOUDINARY_CLOUD_NAME=your-cloudinary-cloud-name
-CLOUDINARY_API_KEY=your-cloudinary-api-key
-CLOUDINARY_API_SECRET=your-cloudinary-api-secret
-BREVO_API_KEY==your-brevo-api-key
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URL=your-google-redirecturl
-RAZORPAY_KEY_ID=your-razorpay-key-id
-RAZORPAY_KEY_SECRET=your-razorpay-key-secret
-PAYMENT_DATA_SECRET=your-payment-data-secret
+SECRETKEY="your_secure_jwt_key"
+
+# Database
+DB="host=... user=... password=... dbname=... port=..."
+
+# External APIs
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+BREVO_API_KEY="..."
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+RAZORPAY_KEY_ID="..."
+RAZORPAY_KEY_SECRET="..."
 ```
 
-### 3️⃣ Install dependencies:
+### 🛠️ Installation & Run
+1. **Fetch Dependencies**:
+   ```bash
+   go mod tidy
+   ```
+2. **Launch Application**:
+   ```bash
+   go run main.go
+   ```
+3. **Production Build**:
+   ```bash
+   make build
+   ```
 
-```sh
-go mod tidy
-```
+---
 
-### 4️⃣ Start the server
+## 🌐 Deployment Strategy
 
-```sh
-go run main.go
-```
+### Containerization
+The project is fully **Dockerized**, allowing for consistent environment behavior from development to production.
+- Use `docker build -t vogueluxe .` to create the image.
 
-### 5️⃣ Access the website:
+### Orchestration
+**Kubernetes (K8s)** manifests are provided for automated scaling and zero-downtime deployments:
+- `deployment.yaml`: Manages the application pods, replicas, and container images.
+- `service.yaml`: Exposes the application to internal/external traffic via LoadBalancers.
 
-- **User Panel:** [http://localhost:8080](http://localhost:8080)  
-- **Admin Panel:** [http://localhost:8080/admin/login](http://localhost:8080/admin/login)
+### Infrastructure
+Designed for deployment on **AWS (EC2/RDS)**:
+- **Nginx** is recommended as a reverse proxy for TLS termination and performance optimization.
+- **GORM AutoMigrate** ensures the RDS schema is always in sync with the codebase.
 
-## 🌍 Deployment on AWS with Nginx
+---
 
-1️⃣ Set up an EC2 instance and install Golang & PostgreSQL.
+## 📈 Logging & Debugging
+The platform uses the **Uber-Zap Logger** located in `pkg/logger`.
+- **In Development**: Pretty-printed console logs with detailed stack traces.
+- **In Production**: Structured JSON logging for integration with ELK stack or AWS CloudWatch.
 
-2️⃣ Clone the repository and set up environment variables.
-
-3️⃣ Install and configure Nginx to reverse proxy the Golang server.
-
-4️⃣ Set up SSL/TLS security using Let's Encrypt.
-
-5️⃣ Run the application in production mode.
-
-6️⃣ Run the Application – Start the Golang server in production mode.
+---
+*Maintained by [Mohammad Niyas](https://github.com/Mohammad-Niyas)*
