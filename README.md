@@ -1,142 +1,356 @@
-# VogueLuxe E-Commerce Platform: Technical Documentation
+# VogueLuxe — E-Commerce Platform (Monolithic Architecture)
 
-A robust, enterprise-grade e-commerce engine built using **Golang** and the **MVC (Model-View-Controller)** architecture. This platform is designed for high-performance retail operations, featuring scalable service integrations and a secure, cloud-native deployment strategy.
+> **⚠️ Architecture Note:** This is the **monolithic** version of VogueLuxe. All business domains — authentication, catalog, orders, payments, inventory, and wallet — are bundled into a single deployable Go binary. A microservices decomposition is planned as a separate initiative.
 
----
-
-## 🛠️ Technology Stack
-
-### Core Backend
-- **Language**: Go (v1.24.0) — Chosen for its efficiency in concurrent processing and low memory footprint.
-- **Web Framework**: [Gin-Gonic v1.11](https://gin-gonic.com/) — A high-performance HTTP web framework with a minimalist API.
-- **ORM**: [GORM v1.25+](https://gorm.io/) — Used for streamlined database interactions and automated schema migrations.
-- **Database**: [PostgreSQL](https://www.postgresql.org/) — Relational database management system for transactional data integrity.
-
-### Integrated Services
-- **Payments**: [Razorpay API](https://razorpay.com/) — Handles secure checkouts, payment verification, and transaction logging.
-- **Authentication**: 
-  - **JWT (JSON Web Tokens)** — For stateless session management between the client and server.
-  - **Google OAuth 2.0** — Social login integration for enhanced user accessibility.
-- **Communications**: [Brevo (formerly Sendinblue)](https://www.brevo.com/) — SMTP/API service for transactional emails and OTP (One-Time Password) generation.
-- **CDN/Storage**: [Cloudinary](https://cloudinary.com/) — Automated image optimization and cloud storage for product assets.
-- **Logging**: [Uber-Zap](https://github.com/uber-go/zap) — Blazing fast, structured, leveled logging for production debugging.
-
-### Frontend
-- **Templating**: Gin's built-in `html/template` engine for server-side rendering (SSR).
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/) — Utility-first CSS framework for responsive and modern UI design.
+A production-grade e-commerce backend built with **Go** and the **Gin** web framework, following the **MVC (Model-View-Controller)** pattern. The application ships as a single process backed by PostgreSQL, with server-side rendered HTML templates and third-party integrations for payments, media, and communications.
 
 ---
 
-## 🏗️ Architectural Overview
+## Why Monolithic?
 
-The project follows a strict **MVC (Model-View-Controller)** pattern to ensure a clean separation of concerns and maintainability.
+This architecture was chosen deliberately for the initial version:
 
-### Data Flow Pattern
-1. **Client Request**: Originates from the user's browser or an API client.
-2. **Middleware**: JWT verification, role-based access control (RBAC), and request logging occur before reaching the controller.
-3. **Controller**: Validates entry parameters and invokes the necessary business logic.
-4. **Model/Service**: Interactions with PostgreSQL via GORM or external APIs (Razorpay/Cloudinary).
-5. **View/Response**: The server renders an HTML template (using Gin's `LoadHTMLGlob`) or returns a structured JSON response.
-
-### Core Modules
-| Module | Description |
+| Aspect | Rationale |
 | :--- | :--- |
-| **User & Auth** | Signup/Login with OTP verification, Google OAuth integration, and JWT session handling. |
-| **Catalog System** | Multi-level category management with dynamic product filtering and search. |
-| **Order Engine** | Transactional flow from cart to fulfillment, including PDF invoice generation. |
-| **Inventory** | Real-time stock tracking with automated updates upon order completion. |
-| **Promotions** | Coupon management system with validity checks and discount calculations. |
-| **Wallets** | Integrated credit system for users to store and spend balance within the app. |
+| **Single deployment unit** | One Go binary, one `Dockerfile`, one K8s Deployment — minimal operational overhead |
+| **Shared database** | All 22 domain models live in a single PostgreSQL database with foreign key relationships managed by GORM |
+| **In-process communication** | Controllers call each other directly; no network hops, no serialization overhead |
+| **Single request lifecycle** | One Gin router handles all ~100 routes for both Admin and User panels |
+| **Simpler debugging** | Full stack traces in one process, structured logging via Uber-Zap |
 
----
+### Monolithic Boundaries (Future Microservice Candidates)
 
-## 📂 Project Structure
-
-```text
-Ecommerce-Project/
-├── config/             # Configuration logic (DB, Env, Google Auth)
-├── controllers/        # Business logic for Admin, Users, Products, etc.
-├── k8s/                # Kubernetes Deployment & Service manifests
-├── middleware/         # Auth (JWT), Logging, and UI Access Checkers
-├── models/             # GORM Entity definitions and Database schema
-├── pkg/                # Reusable packages (Logger setup)
-├── routers/            # Route definitions for User and Admin panels
-├── utils/              # Third-party integrations (Cloudinary, Razorpay, OTP)
-├── views/              # SSR HTML Templates (Admin/User subdirectories)
-├── main.go             # Application entry point & Server initialization
-├── go.mod/go.sum       # Dependency management
-├── Dockerfile          # Containerization manifest
-└── Makefile            # Build and Automation commands
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                     SINGLE GO BINARY (:8080)                     │
+│                                                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐   │
+│  │  Auth & User  │  │   Catalog    │  │   Orders & Payments  │   │
+│  │  Management   │  │   (Products, │  │   (Cart, Checkout,   │   │
+│  │  (Signup,     │  │   Categories,│  │   Razorpay, Invoice) │   │
+│  │   Login, OTP, │  │   Variants,  │  │                      │   │
+│  │   OAuth, JWT) │  │   Offers)    │  │                      │   │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘   │
+│         │                 │                      │               │
+│  ┌──────┴───────┐  ┌──────┴───────┐  ┌──────────┴───────────┐   │
+│  │   Wallet &   │  │   Coupons &  │  │   Admin Dashboard    │   │
+│  │   Wishlist   │  │   Promotions │  │   (Reports, PDF,     │   │
+│  │              │  │              │  │    User Mgmt, Excel) │   │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘   │
+│                                                                  │
+│                    ┌──────────────────┐                          │
+│                    │   PostgreSQL     │                          │
+│                    │   (22 tables)    │                          │
+│                    └──────────────────┘                          │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Getting Started
+## Tech Stack
 
-### 📋 Prerequisites
-- **Go 1.24+**: For compiling and running the backend.
-- **PostgreSQL**: A running instance with a dedicated database.
-- **Docker/K8s** (Optional): For containerized local development or production clusters.
+| Layer | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Language** | Go 1.24 | High-performance, compiled backend |
+| **Web Framework** | Gin-Gonic v1.11 | HTTP routing, middleware, SSR template rendering |
+| **ORM** | GORM v1.31 | PostgreSQL interactions, AutoMigrate schema sync |
+| **Database** | PostgreSQL | Relational storage for all 22 domain models |
+| **Auth** | JWT (HS256) + Google OAuth 2.0 | Stateless sessions, social login |
+| **Payments** | Razorpay API | Checkout, payment verification, retry flows |
+| **Media Storage** | Cloudinary | Product image upload, transformation, CDN delivery |
+| **Email/OTP** | Brevo (Sendinblue) | Transactional emails, OTP verification |
+| **Logging** | Uber-Zap | Structured, leveled logging (JSON in prod) |
+| **PDF Generation** | gofpdf | Invoice downloads, sales report exports |
+| **Frontend** | Go `html/template` + Tailwind CSS | Server-side rendered admin & user panels |
+| **Containerization** | Docker (multi-stage build) | Alpine-based production image |
+| **Orchestration** | Kubernetes | Deployment manifests with 2 replicas |
 
-### ⚙️ Environment Configuration
-Create a `.env` file in the root directory with the following keys:
+---
+
+## Project Structure
+
+```
+VogueLuxe-Ecommerce/
+│
+├── main.go                          # Application entry point — initializes logger,
+│                                    # loads env, connects DB, registers all routes,
+│                                    # starts Gin on :8080
+│
+├── config/
+│   ├── dbConnection.go              # PostgreSQL connection + AutoMigrate (22 models)
+│   ├── envLoad.go                   # godotenv loader
+│   └── googleAuth.go               # Google OAuth2 client configuration
+│
+├── controllers/
+│   ├── AdminController.go           # Admin auth, dashboard, reports (PDF/Excel)
+│   ├── AdminOrderController.go      # Order status management, return approvals
+│   ├── CategoryController.go        # Category CRUD, category-level offers
+│   ├── CouponController.go          # Coupon CRUD, toggle, validation
+│   ├── ProductController.go         # Product/variant CRUD, image upload, offers
+│   ├── UserAddtoCart.go             # Cart, checkout, Razorpay integration, orders
+│   ├── UserController.go           # User auth, profile, address, OAuth, OTP
+│   └── WalletController.go         # Wallet top-up, transaction history
+│
+├── models/
+│   ├── UserModels.go                # User, UserDetails
+│   ├── AdminModels.go               # Admin
+│   ├── Category.go                  # Category, CategoryOffer
+│   ├── Product.go                   # Product, ProductImage, ProductVariant, ProductOffer
+│   ├── Cart.go                      # Cart, CartItem
+│   ├── Order.go                     # Order, OrderItem, ReturnRequest, ShippingAddress
+│   ├── Payment.go                   # PaymentDetails
+│   ├── Coupon.go                    # Coupon
+│   ├── Wallet.go                    # Wallet, WalletTransaction
+│   ├── Wishlist.go                  # Wishlist, WishlistItem
+│   ├── Address.go                   # Address
+│   └── Otp.go                       # OTP
+│
+├── middleware/
+│   └── jwt.go                       # JWT generation/validation, RBAC (Admin/User),
+│                                    # no-cache headers, auth redirect
+│
+├── routers/
+│   ├── Admin_Router.go              # ~50 admin routes (dashboard, products, orders, etc.)
+│   └── User_Router.go              # ~50 user routes (auth, cart, checkout, profile, etc.)
+│
+├── utils/
+│   ├── Cloudinary.go                # Image upload/delete via Cloudinary SDK
+│   ├── Otp.go                       # OTP generation & email dispatch via Brevo API
+│   └── paymentRazorpay.go          # Razorpay order creation & signature verification
+│
+├── pkg/
+│   └── logger/
+│       └── logger.go                # Uber-Zap logger initialization
+│
+├── views/
+│   ├── Admin/                       # 17 SSR templates (dashboard, product mgmt, etc.)
+│   └── User/                        # 23 SSR templates (home, cart, checkout, profile, etc.)
+│
+├── k8s/
+│   ├── deployment.yaml              # 2-replica deployment, env from K8s Secret
+│   └── service.yaml                 # Service exposure config
+│
+├── Dockerfile                       # Multi-stage: golang:1.24-alpine → alpine:latest
+├── makefile                         # `make tidy` and `make run` shortcuts
+├── go.mod / go.sum                  # Go module dependencies
+└── .gitignore / .dockerignore
+```
+
+---
+
+## Domain Models (22 Tables)
+
+All models reside in a single PostgreSQL database, auto-migrated via GORM on startup:
+
+```
+User ──────┬── UserDetails
+           ├── Address
+           ├── Cart ──── CartItem ──── ProductVariant
+           ├── Wishlist ── WishlistItem
+           ├── Wallet ──── WalletTransaction
+           └── Order ──┬── OrderItem
+                       ├── ReturnRequest
+                       ├── ShippingAddress
+                       └── PaymentDetails
+
+Category ──── CategoryOffer
+Product ──┬── ProductImage
+          ├── ProductVariant
+          └── ProductOffer
+
+Admin
+Otp
+Coupon
+```
+
+---
+
+## Core Features
+
+### 🔐 Authentication & Authorization
+- Email/password signup with OTP verification (Brevo API)
+- Google OAuth 2.0 social login
+- JWT-based stateless sessions (HS256, 2-hour expiry)
+- Role-based access control: `Admin` and `User` middleware guards
+- Forgot password flow with OTP reset
+
+### 🛒 Shopping Experience
+- Product browsing with dynamic filtering and search
+- Multi-variant product support (size, color, stock per variant)
+- Wishlist with move-to-cart functionality
+- Cart management with real-time stock validation
+- Multi-step checkout: Address → Payment Method → Confirm
+
+### 💳 Payments
+- Razorpay integration with order creation and signature verification
+- Cash on Delivery option
+- Wallet-based payments
+- Failed payment retry flow
+- Pre-order creation for payment validation
+
+### 📦 Order Management
+- Full order lifecycle: Placed → Confirmed → Shipped → Delivered
+- Individual item cancellation within an order
+- Return request submission and admin approval/rejection
+- PDF invoice generation and download (gofpdf)
+- Order history with detailed item-level view
+
+### 🎟️ Promotions & Coupons
+- Coupon CRUD with validity period and usage limits
+- Product-level and category-level offers with percentage discounts
+- Discount stacking and calculation engine
+
+### 💰 Wallet System
+- In-app wallet with top-up via Razorpay
+- Wallet balance used during checkout
+- Refunds credited to wallet on cancellation/return
+- Full transaction history for users and admin
+
+### 🛠️ Admin Panel
+- Dashboard with sales analytics and revenue data
+- Sales report export: PDF and Excel downloads
+- Product management with multi-image upload (Cloudinary)
+- User management: block/unblock users
+- Category management with nested offers
+- Order status updates and return processing
+- Coupon management with toggle activation
+- Wallet oversight and transaction audit
+
+---
+
+## Getting Started
+
+### Prerequisites
+- **Go 1.24+**
+- **PostgreSQL** (local or cloud — RDS, Neon, Supabase, etc.)
+- **Docker** (optional, for containerized deployment)
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
 ```env
-# Server
-PORT=8080
-SECRETKEY="your_secure_jwt_key"
-
 # Database
-DB="host=... user=... password=... dbname=... port=..."
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_NAME=vogueluxe
+DB_PORT=5432
 
-# External APIs
-CLOUDINARY_CLOUD_NAME="..."
-CLOUDINARY_API_KEY="..."
-CLOUDINARY_API_SECRET="..."
-BREVO_API_KEY="..."
-GOOGLE_CLIENT_ID="..."
-GOOGLE_CLIENT_SECRET="..."
-RAZORPAY_KEY_ID="..."
-RAZORPAY_KEY_SECRET="..."
+# Auth
+SECRETKEY=your_jwt_secret_key
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# External Services
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+BREVO_API_KEY=your_brevo_api_key
+RAZORPAY_KEY_ID=your_razorpay_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
 ```
 
-### 🛠️ Installation & Run
-1. **Fetch Dependencies**:
-   ```bash
-   go mod tidy
-   ```
-2. **Launch Application**:
-   ```bash
-   go run main.go
-   ```
-3. **Production Build**:
-   ```bash
-   make build
-   ```
+### Run Locally
+
+```bash
+# Install dependencies
+go mod tidy
+
+# Start the server
+go run main.go
+# or
+make run
+```
+
+The application starts on **http://localhost:8080**
+
+### Docker
+
+```bash
+# Build image
+docker build -t vogueluxe .
+
+# Run container
+docker run -p 8080:8080 --env-file .env vogueluxe
+```
+
+### Kubernetes
+
+```bash
+# Create secrets from env vars
+kubectl create secret generic ecommerce-secret --from-env-file=.env
+
+# Deploy
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
 
 ---
 
-## 🌐 Deployment Strategy
+## API Routes Overview
 
-### Containerization
-The project is fully **Dockerized**, allowing for consistent environment behavior from development to production.
-- Use `docker build -t vogueluxe .` to create the image.
+### Public Routes
+| Method | Path | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Home page |
+| `GET` | `/product` | Product listing with filters |
+| `GET` | `/product/:id` | Product detail page |
+| `GET/POST` | `/signup` | User registration |
+| `GET/POST` | `/login` | User login |
+| `GET` | `/auth/google` | Google OAuth initiation |
+| `GET/POST` | `/verify-otp` | OTP verification |
+| `GET/POST` | `/forgot-password` | Password reset flow |
 
-### Orchestration
-**Kubernetes (K8s)** manifests are provided for automated scaling and zero-downtime deployments:
-- `deployment.yaml`: Manages the application pods, replicas, and container images.
-- `service.yaml`: Exposes the application to internal/external traffic via LoadBalancers.
+### Protected User Routes (~30 routes)
+Cart, checkout, orders, profile, address, wishlist, wallet — all behind JWT `User` middleware.
 
-### Infrastructure
-Designed for deployment on **AWS (EC2/RDS)**:
-- **Nginx** is recommended as a reverse proxy for TLS termination and performance optimization.
-- **GORM AutoMigrate** ensures the RDS schema is always in sync with the codebase.
+### Admin Routes (~50 routes)
+Dashboard, product CRUD, category management, order processing, coupon management, user management, wallet oversight — all behind JWT `Admin` middleware.
+
+---
+
+## Logging
+
+Structured logging via **Uber-Zap** (`pkg/logger`):
+
+- **Development**: Human-readable console output with stack traces
+- **Production**: JSON-formatted logs suitable for ELK Stack, CloudWatch, or Datadog
 
 ---
 
-## 📈 Logging & Debugging
-The platform uses the **Uber-Zap Logger** located in `pkg/logger`.
-- **In Development**: Pretty-printed console logs with detailed stack traces.
-- **In Production**: Structured JSON logging for integration with ELK stack or AWS CloudWatch.
+## Deployment Architecture
+
+```
+                    ┌─────────────┐
+                    │   Nginx     │
+                    │  (Reverse   │
+                    │   Proxy)    │
+                    └──────┬──────┘
+                           │
+              ┌────────────┼────────────┐
+              │            │            │
+        ┌─────┴─────┐ ┌───┴─────┐ ┌───┴─────┐
+        │  Pod (Go)  │ │ Pod (Go)│ │ Pod (Go)│
+        │  :8080     │ │ :8080   │ │ :8080   │
+        └─────┬──────┘ └───┬─────┘ └───┬─────┘
+              │            │            │
+              └────────────┼────────────┘
+                           │
+                    ┌──────┴──────┐
+                    │ PostgreSQL  │
+                    │  (RDS)      │
+                    └─────────────┘
+```
+
+All pods run the **same monolithic binary**. Scaling is horizontal (add more replicas of the same application). There is no service-to-service communication — everything is in-process.
 
 ---
-*Maintained by [Mohammad Niyas](https://github.com/Mohammad-Niyas)*
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+*Built by [Mohammad Niyas](https://github.com/Mohammad-Niyas)*
